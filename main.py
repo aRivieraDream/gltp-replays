@@ -66,13 +66,13 @@ async def github_webhook(request: Request):
     if not ref.endswith("/main"):
         raise HTTPException(status_code=400, detail="Not from main branch")
     
-    # Run the webhook handler
-    import subprocess
+    # Write to a file that the host can monitor
     try:
-        subprocess.run(["/usr/local/bin/webhook-handler"], check=True)
+        with open("/app/data/webhook_trigger", "w") as f:
+            f.write(str(time.time()))
         return {"status": "success"}
-    except subprocess.CalledProcessError as e:
-        raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to trigger deployment: {str(e)}")
 
 
 @app.post("/replay")
