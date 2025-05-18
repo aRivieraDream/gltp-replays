@@ -3,7 +3,7 @@ from typing import Optional, Dict, Any
 import json, time
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
@@ -49,6 +49,30 @@ async def refresh_maps():
 @app.get("/")
 async def serve_index():
     return FileResponse(Path(__file__).parent / "static" / "index.html")
+
+
+@app.post("/webhook")
+async def github_webhook(request: Request):
+    # Verify it's a push event
+    event_type = request.headers.get("X-GitHub-Event")
+    if event_type != "push":
+        raise HTTPException(status_code=400, detail="Not a push event")
+    
+    # Get the payload
+    payload = await request.json()
+    
+    # Verify it's from the main branch
+    ref = payload.get("ref", "")
+    if not ref.endswith("/main"):
+        raise HTTPException(status_code=400, detail="Not from main branch")
+    
+    # Run the webhook handler
+    import subprocess
+    try:
+        subprocess.run(["/usr/local/bin/webhook-handler"], check=True)
+        return {"status": "success"}
+    except subprocess.CalledProcessError as e:
+        raise HTTPException(status_code=500, detail=f"Deployment failed: {str(e)}")
 
 
 @app.post("/replay")
