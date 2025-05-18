@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+aiofiles
+httpx
+
+fastapi-utils
+typing_inspect  # implicit fastapi-utils dep

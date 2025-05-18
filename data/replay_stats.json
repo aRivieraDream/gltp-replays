@@ -1,0 +1,34 @@
+{
+  "6700517c-d1e5-469f-9085-b72b48649943": {
+    "map_id": "82514",
+    "actual_map_id": "82514",
+    "preset": null,
+    "map_name": "Don't touch the spikes",
+    "map_author": "Tagnoob.",
+    "players": [
+      {
+        "name": "Some Ball 1",
+        "user_id": null,
+        "is_red": true
+      },
+      {
+        "name": "Some Ball 2",
+        "user_id": null,
+        "is_red": true
+      },
+      {
+        "name": "Some Ball 3",
+        "user_id": null,
+        "is_red": true
+      }
+    ],
+    "capping_player": "Some Ball 3",
+    "capping_player_user_id": null,
+    "record_time": 20281,
+    "is_solo": false,
+    "timestamp": 1742711319263,
+    "uuid": "6700517c-d1e5-469f-9085-b72b48649943",
+    "caps_to_win": 1,
+    "capping_player_quote": "SB NATION, SB LIFE"
+  }
+}
