@@ -1,0 +1,533 @@
+/* Dark mode global styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+/* Top bar for navigation */
+.top-bar {
+  background-color: #1f1f1f;
+  padding: 10px 20px;
+  color: #e0e0e0;
+  display: flex;
+  justify-content: center !important;
+  align-items: center !important;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav {
+  display: flex;
+  gap: 20px;
+}
+
+.nav a {
+  color: #e0e0e0;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.nav a:hover {
+  background-color: #333;
+}
+
+.nav a.active {
+  background-color: #1e90ff;
+  font-weight: bold;
+}
+
+/* Container for side-by-side layout */
+#mapsRecordsContainer {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Left side (Maps Table) */
+#mapsTableContainer {
+  flex: 2;
+  overflow-x: auto;
+}
+
+button {
+  padding: 10px 16px;
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  margin: 4px;
+}
+
+button:hover {
+  background-color: #0078d7;
+}
+/* Table styles for Maps and Recent Records */
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1f1f1f;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+#mapsTable {
+  table-layout: fixed;
+}
+
+#mapsTable td.map-name {
+  max-width: 600px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+#mapsRecordsContainer table th,
+#mapsRecordsContainer table td {
+  font-size: 0.8rem;
+  padding: 4px 6px;
+  line-height: 1.1;
+  height: 20px;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+#mapsRecordsContainer table th {
+  background-color: #2b2b2b;
+  font-weight: bold;
+}
+
+#mapsRecordsContainer table tr:hover {
+  background-color: #2a2a2a;
+}
+
+/* Hidden detail section for map row */
+.map-name {
+  cursor: pointer;
+  color: #1e90ff;
+  font-weight: bold;
+}
+
+.detail {
+  display: inline-block;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 5px;
+  margin-top: 5px;
+  max-width: 400px;
+}
+
+/* Leaderboard page styles */
+#leaderboardPage {
+  display: none;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+#leaderboardContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.leaderboard-section {
+  flex: 1;
+  min-width: 250px;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #1f1f1f;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+#leaderboardPage table th,
+#leaderboardPage table td {
+  font-size: 0.7rem;
+  padding: 3px 4px;
+  line-height: 1.1;
+  height: 20px;
+  border-bottom: 1px solid #444;
+  text-align: left;
+}
+
+#leaderboardPage table th {
+  background-color: #2b2b2b;
+  font-weight: bold;
+}
+
+#leaderboardPage table tr:hover {
+  background-color: #2a2a2a;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.copy-button {
+  top: 3px;
+  position: relative;
+  font-size: 10px;
+}
+
+/* Additional styling enhancements */
+a {
+  color: #1e90ff;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* New styles for detail sections */
+.detail-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.left-detail {
+  border: 1px solid #333;
+  padding: 10px;
+  border-radius: 5px;
+  min-width: 200px;
+  background-color: #1e1e1e;
+}
+
+.medal-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.medal-link {
+  text-decoration: none;
+}
+
+.medal-row {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid;
+  margin-bottom: 5px;
+  background-color: #1e1e1e;
+}
+
+.medal-label {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.medal-time {
+  padding: 2px 5px;
+  border-radius: 5px;
+}
+
+.capping-player-quote {
+  font-style: italic;
+  margin-top: 5px;
+  color: #888;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .detail-wrapper {
+    flex-direction: column;
+  }
+
+  .medal-panel {
+    margin-top: 10px;
+  }
+}
+
+/* CSS-only improvements for the filter UI */
+
+
+.nav {
+  display: flex;
+  gap: 30px;
+}
+
+/* Make active nav item have a more solid appearance */
+.nav a.active {
+  background-color: #1e90ff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  color: white;
+}
+
+/* Fix search and filter row layout */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+/* Enhance search input */
+.search-input {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  height: 30px !important;
+  flex: 1;
+}
+
+/* Improve select dropdown styling */
+.filter-select {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 14px;
+  height: 48px !important;
+  min-width: 120px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+/* Fix Choices.js styling */
+.choices {
+  margin-bottom: 0;
+}
+
+.choices__inner {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 5px 8px;
+  min-height: 38px;
+}
+
+/* Fix the choices list dropdown style */
+.choices__list--dropdown {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.choices__list--dropdown .choices__item--selectable {
+  color: #e0e0e0;
+  padding: 8px 12px;
+}
+
+.choices__list--dropdown .choices__item--selectable.is-highlighted {
+  background-color: #2a2a2a;
+}
+
+/* Improve tag styling */
+.choices__list--multiple .choices__item {
+  background-color: #026fc2;
+  border: none;
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: white;
+  margin-right: 6px;
+  margin-bottom: 3px;
+}
+
+/* Fix input area */
+.choices__input {
+  background-color: transparent;
+  color: #e0e0e0;
+  font-size: 14px;
+}
+
+/* Fix placeholder styling */
+.choices__placeholder {
+  opacity: 0.7;
+  color: #999;
+}
+
+/* Button styling */
+button.upload-button {
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  margin-top: 0 !important;
+  height: 48px !important;
+}
+
+button.upload-button:hover {
+  background-color: #0074d9;
+}
+
+/* Clean up the categories container */
+.category-chooser {
+  background-color: #1f1f1f;
+  border: 1px solid #333;
+  border-radius: 4px;
+  margin-top: 8px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, border-width 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.category-chooser.is-active {
+  max-height: 200px;
+  border-width: 1px;
+  overflow-y: auto;
+}
+
+/* Fix the tag container */
+.category-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background-color: #fff;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+/* In case "Select categories" shows as a placeholder */
+.choices[data-type*="select-multiple"] .choices__inner {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+/* Specifically style the category button appearance */
+.choices__list--multiple .choices__item.is-highlighted {
+  background-color: #026fc2;
+  opacity: 0.9;
+}
+
+/* Fix the close button on tags */
+.choices__button {
+  border-left: none;
+  padding-left: 4px;
+  opacity: 0.7;
+}
+
+.choices__button:hover {
+  opacity: 1;
+}
+
+/* When choices dropdown is open */
+.is-open .choices__inner {
+  border-radius: 4px 4px 0 0;
+  border-color: #444;
+}
+
+/* For the specific category filter area - make it match the row style */
+#categorySelector {
+  background-color: #fff; /* Will be overridden by Choices.js */
+  border-radius: 4px;
+  max-width: 600px;
+}
+
+/* Fix the active category pill styles */
+.category-pill {
+  background-color: #026fc2;
+  color: white;
+  border-radius: 16px;
+  padding: 5px 12px;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.category-pill .close-icon {
+  margin-left: 6px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.category-pill .close-icon:hover {
+  opacity: 1;
+}
+
+/* Style table headings to match the new style */
+#mapsTable th {
+  background-color: #2b2b2b;
+  padding: 10px 12px;
+  font-weight: 500;
+  color: #e0e0e0;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+/* Fix responsive behavior */
+@media (max-width: 768px) {
+  .search-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .search-input {
+    flex: 1 1 100%;
+  }
+
+  .filter-select {
+    flex: 1 1 auto;
+  }
+
+  .choices {
+    flex: 1 1 100%;
+  }
+
+  button.upload-button {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+}
+
+.search-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* optional for responsiveness */
+  gap: 8px; /* optional spacing */
+}
+
+.search-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.search-right {
+  margin-left: auto;
+}

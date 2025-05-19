@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GLTP</title>
+  <link rel="stylesheet" href="/S2/gltp.d80d2a9d.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="nav">
+      <a id="homeLink">Home</a>
+      <a id="standingsLink" class="active">Standings</a>
+      <a id="linksLink">Info Links</a>
+      <a id="week1Link">Week 1</a>
+      <a id="week2Link">Week 2</a>
+      <a id="week3Link">Week 3</a>
+      <a id="rostersLink">Rosters</a>
+    </div>
+  </div>
+
+  <div id="homePage" class="page-container">
+    <div id="homeContent">Loading links...</div>
+  </div>
+
+   <div id="rostersPage" class="page-container">
+    <div id="rosterContent">Loading rosters...</div>
+  </div>
+
+  <div id="linksPage" class="page-container">
+    <div id="linksContent">Loading links...</div>
+  </div>
+
+  <div id="week1Page" class="page-container">
+    <div id="week1Content">Loading week 1...</div>
+  </div>
+
+  <div id="week2Page" class="page-container">
+    <div id="week2Content">Loading week 2...</div>
+  </div>
+
+  <div id="week3Page" class="page-container">
+    <div id="week3Content">Loading week 3...</div>
+  </div>
+
+  <div id="standingsPage" class="page-container active">
+    <div id="standingsContent">Loading standings...</div>
+  </div>
+
+  <script>
+    const navItems = {
+      homeLink: 'homePage',
+      rostersLink: 'rostersPage',
+      linksLink: 'linksPage',
+      week1Link: 'week1Page',
+      week2Link: 'week2Page',
+      week3Link: 'week3Page',
+      standingsLink: 'standingsPage'
+    };
+
+    Object.keys(navItems).forEach(linkId => {
+      document.getElementById(linkId).addEventListener('click', () => {
+        if (navItems[linkId] === 'homePage') {
+          window.location.href = '/GLTP';
+          return;
+        }
+        // Hide all pages
+        Object.values(navItems).forEach(pageId => {
+          document.getElementById(pageId).classList.remove('active');
+        });
+
+        // Remove active from all links
+        Object.keys(navItems).forEach(id => {
+          document.getElementById(id).classList.remove('active');
+        });
+
+        // Show selected page
+        document.getElementById(navItems[linkId]).classList.add('active');
+        document.getElementById(linkId).classList.add('active');
+      });
+    });
+fetch('gltpRosters.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('rosterContent').innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById('rosterContent').innerHTML = "Failed to load roster.";
+    console.error("Error loading week1 file:", err);
+  });
+fetch('S1W1.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('week1Content').innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById('week1Content').innerHTML = "Failed to load roster.";
+    console.error("Error loading week1 file:", err);
+  });
+    fetch('S1W2.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('week2Content').innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById('week2Content').innerHTML = "Failed to load roster.";
+    console.error("Error loading week2 file:", err);
+  });
+    fetch('S1W3.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('week3Content').innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById('week3Content').innerHTML = "Failed to load roster.";
+    console.error("Error loading week3 file:", err);
+  });
+    fetch('gltp_links.html')
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById('linksContent').innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById('linksContent').innerHTML = "Failed to load roster.";
+    console.error("Error loading links file:", err);
+  });
+
+  function enableToggleListeners() {
+  document.querySelectorAll('.toggle-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const targetId = header.getAttribute('data-toggle-target');
+      const target = document.getElementById(targetId);
+      const arrow = header.querySelector('.arrow');
+
+      if (target) {
+        const isHidden = target.style.display === 'none' || getComputedStyle(target).display === 'none';
+        target.style.display = isHidden ? 'block' : 'none';
+
+        if (arrow) {
+          arrow.textContent = isHidden ? '▼' : '▶';
+        }
+      }
+    });
+  });
+}
+
+  fetch('standings.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('standingsContent').innerHTML = html;
+      enableToggleListeners(); // <-- important: run *after* content loads
+    })
+    .catch(err => {
+      document.getElementById('standingsContent').innerHTML = "Failed to load standings.";
+      console.error("Error loading standings file:", err);
+    });
+  </script>
+</body>
+</html>

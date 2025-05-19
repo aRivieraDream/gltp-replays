@@ -1,0 +1,327 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input {
+    padding: 10px 12px;
+    border: 1px solid #444;
+    background-color: #2a2a2a;
+    color: #fff;
+    border-radius: 4px;
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+.results {
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    padding: 20px;
+    margin-top: 20px;
+    display: none;
+}
+
+.replay-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.info-card {
+    background-color: #333;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.record-time {
+    font-size: 28px;
+    font-weight: bold;
+    color: #1e90ff;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 15px;
+    background-color: rgba(30, 144, 255, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(30, 144, 255, 0.3);
+}
+
+.info-card h3 {
+    margin-top: 0;
+    color: #1e90ff;
+    border-bottom: 1px solid #444;
+    padding-bottom: 8px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.info-label {
+    color: #aaa;
+}
+
+.info-value {
+    font-weight: bold;
+}
+
+.player-list {
+    margin-top: 20px;
+}
+
+.player-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.player-table th {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #444;
+    color: #1e90ff;
+}
+
+.player-table td {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.team-red {
+    color: #ff4d4d;
+}
+
+.team-blue {
+    color: #4d79ff;
+}
+
+.capping-player {
+    background-color: rgba(30, 144, 255, 0.2);
+    font-weight: bold;
+}
+
+.tab-buttons {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    background-color: #333;
+    color: #e0e0e0;
+    border: none;
+    cursor: pointer;
+}
+
+.tab-btn.active {
+    background-color: #1e90ff;
+    color: white;
+}
+
+.tab-btn:first-child {
+    border-radius: 4px 0 0 4px;
+}
+
+.tab-btn:last-child {
+    border-radius: 0 4px 4px 0;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.json-view {
+    background-color: #282828;
+    padding: 15px;
+    border-radius: 4px;
+    font-family: monospace;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #999;
+}
+
+.error-message {
+    color: #ff6b6b;
+    padding: 10px;
+    background-color: rgba(255, 107, 107, 0.1);
+    border-radius: 4px;
+    margin-top: 15px;
+}
+
+.navigation {
+    background-color: #252525;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.navigation a {
+    color: #1e90ff;
+    text-decoration: none;
+    margin-right: 20px;
+    font-weight: bold;
+}
+
+.navigation a:hover {
+    text-decoration: underline;
+}
+
+.active-nav {
+    color: #ffffff !important;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #1f1f1f;
+    margin: 5% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 85vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #e0e0e0;
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+.modal-form {
+    position: sticky;
+    top: 0;
+    background-color: #1f1f1f;
+    padding: 10px 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.url-input {
+    padding: 8px 12px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+/* Scrollbar styles */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #2b2b2b;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Button styles */
+.submit-button {
+    padding: 8px 16px;
+    background-color: #1e90ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+    background-color: #0078d7;
+}
+
+.submit-button.submitting {
+    background-color: #666;
+    cursor: not-allowed;
+}
+
+.submit-button:disabled,
+.cancel-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.url-input:disabled {
+    background-color: #2b2b2b;
+    cursor: not-allowed;
+}
+
+.cancel-button {
+    padding: 8px 16px;
+    background-color: #666;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+    background-color: #555;
+}
+
+.error-message {
+    color: #ff4444;
+    font-size: 14px;
+    margin-top: 8px;
+    padding: 8px;
+    background-color: rgba(255, 68, 68, 0.1);
+    border-radius: 4px;
+    border: 1px solid #ff4444;
+}

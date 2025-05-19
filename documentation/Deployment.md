@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide outlines the deployment process for the replay service.
+This guide outlines the deployment process for the replay service on a VM. You only need to run this once when setting up the VM for the first time. Once you have webhooks setup, the service will update automatically. Local testing can be done using the instructions in README.md
 
 ## Prerequisites
 
@@ -12,12 +12,13 @@ This guide outlines the deployment process for the replay service.
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/aRivieraDream/gltp-replays
    cd replay-service
    ```
 
 2. Run the deployment script:
    ```bash
+   chmod +x deploy.sh
    sudo ./deploy.sh
    ```
 
@@ -28,6 +29,8 @@ The deployment script will:
 - Set up automatic backups
 - Configure the webhook handler for automatic deployments
 - Start the application containers
+
+The process should take 10-15 minutes to install everything
 
 ## Post-Deployment
 

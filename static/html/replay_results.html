@@ -1,0 +1,87 @@
+<div class="results" id="results">
+    <div id="loadingMessage" class="loading">Loading replay data...</div>
+    <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+    <div id="replayContent" style="display: none;">
+        <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="formatted">Formatted View</button>
+            <button class="tab-btn" data-tab="json">JSON View</button>
+        </div>
+
+        <div class="tab-content active" id="formatted-view">
+            <div class="record-time" id="recordTime">Completion Time: <span>--:--</span></div>
+
+            <div class="replay-info">
+                <div class="info-card">
+                    <h3>Map Information</h3>
+                    <div class="info-item">
+                        <span class="info-label">Map Name:</span>
+                        <span class="info-value" id="mapName">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Map Author:</span>
+                        <span class="info-value" id="mapAuthor">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Map ID:</span>
+                        <span class="info-value" id="mapId">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Caps To Win:</span>
+                        <span class="info-value" id="capsToWin">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Allow Blue Caps:</span>
+                        <span class="info-value" id="allowBlueCaps">--</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h3>Replay Details</h3>
+                    <div class="info-item">
+                        <span class="info-label">UUID:</span>
+                        <span class="info-value" id="uuid">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Timestamp:</span>
+                        <span class="info-value" id="timestamp">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Capping Player:</span>
+                        <span class="info-value" id="cappingPlayer">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Solo Cap:</span>
+                        <span class="info-value" id="soloStatus">--</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Player Quote:</span>
+                        <span class="info-value" id="playerQuote">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-list">
+                <h3>Players</h3>
+                <table class="player-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Team</th>
+                            <th>User ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playerTableBody">
+                        <!-- Player data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="json-view">
+            <div class="json-view" id="jsonOutput">
+                <!-- JSON data will be inserted here -->
+            </div>
+        </div>
+    </div>
+</div>

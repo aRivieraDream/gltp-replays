@@ -1,135 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Replay Leaderboard - GLTP</title>
-  <style>
-    body { font-family: sans-serif; background: #111; color: #eee; }
-    table { width:100%; border-collapse:collapse; margin-top:1em }
-    th, td { padding:6px 8px; border:1px solid #333 }
-    th { background:#222 }
-    .player { color:#ccc }
-    .map-links a { margin-left:4px; text-decoration:none; color:#4ea }
-    button { margin-top:1em; padding:6px 12px }
-    /* modal */
-    .modal { display:none; position:fixed; top:0;left:0;
-      width:100%;height:100%;background:rgba(0,0,0,0.6);
-      align-items:center;justify-content:center;
-    }
-    .modal-content { background:#222; padding:20px; border-radius:4px;
-      max-width:300px; width:90%;
-    }
-    .modal-content input { width:100%; padding:6px; margin-bottom:10px }
-    .modal-content ul { margin:0; padding-left:20px }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maps & Leaderboard</title>
+  <link rel="stylesheet" href="/static/style.89a2bd73.css">
+  <link rel="stylesheet" href="/static/css/replay.626d28e8.css">
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    window.BUILD_VERSION = "1747643581892";
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </head>
 <body>
-  <h1>Replay Leaderboard - With Webhooks</h1>
-  <button id="open-modal">Submit Replay</button>
-  <table>
-    <thead>
-      <tr>
-        <th>Map Name</th><th>Record Time</th><th>Set</th>
-        <th>Capping Player</th><th>Balls Required</th>
-      </tr>
-    </thead>
-    <tbody id="stats-body"></tbody>
-  </table>
 
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <h2>Submit Replay</h2>
-      <form id="replay-form">
-        <input name="uuid" placeholder="UUID" required>
-        <button type="submit">Send</button>
-        <button type="button" id="close-modal">Cancel</button>
-      </form>
-      <div id="response"></div>
+  <!-- Top bar for navigation -->
+  <div class="top-bar">
+    <div class="nav">
+      <a id="mapsLink" class="active">Maps</a>
+      <a id="leaderboardLink">Leaderboard</a>
+      <a id="gltpLink">GLTP</a>
     </div>
   </div>
 
-  <script>
-  const m = document.getElementById('modal');
-  document.getElementById('open-modal')
-    .onclick = () => m.style.display = 'flex';
-  document.getElementById('close-modal')
-    .onclick = () => m.style.display = 'none';
+  <!-- Container for side-by-side layout -->
+  <div id="mapsRecordsContainer">
+    <!-- Left: Maps Table -->
+    <div id="mapsTableContainer" class="table-container">
+    <div class="search-row">
+      <div class="search-left">
+        <input type="text" id="mapSearch" placeholder="Search maps..." class="search-input">
+        <button id="search-clear" class="search-clear" style="display: none;">×</button>
+        <select id="gravityFilter" class="filter-select">
+          <option value="">All Types</option>
+          <option value="grav">Gravity</option>
+          <option value="classic">Classic</option>
+        </select>
+        <!-- You can add more elements here -->
+      </div>
+      <div class="search-right">
+        <button id="uploadWrButton" class="upload-button">Check Replay Data</button>
+      </div>
+    </div>
 
-  async function loadStats() {
-    const res = await fetch('/stats'), stats = await res.json();
-    const now = Date.now();
-    const groups = {};
-    Object.entries(stats).forEach(([u,d])=>
-      (groups[d.map_id] ||= []).push({u,...d})
-    );
-    const rows = Object.values(groups).map(g=>{
-      g.sort((a,b)=>a.record_time-b.record_time);
-      const top = g.slice(0,3), ord=['1st','2nd','3rd'];
-      const links = top.map((e,i)=>
-        `<a href="https://tagpro.koalabeast.com/replays?uuid=${e.u}">${ord[i]}</a>`
-      ).join('');
-      const d = top[0], ms=d.record_time;
-      const h=Math.floor(ms/3600000), m=Math.floor(ms%3600000/60000);
-      const s=Math.floor(ms%60000/1000), ms3=ms%1000;
-      const p=(n,z=2)=>String(n).padStart(z,'0');
-      const time=`${p(h)}:${p(m)}:${p(s)}.${p(ms3,3)}`;
-      const diff=now-d.timestamp, days=Math.floor(diff/86400000),
-            w=Math.floor(days/7), r=days%7;
-      let ago = w?`${w}w`:''; ago+= r?(ago?' ':'')+`${r}d`:''; ago=ago?ago+' ago':'today';
-      const pid=d.capping_player_user_id;
-      const player= pid
-        ? `<a href="https://tagpro.koalabeast.com/profile/${pid}">${d.capping_player}</a>`
-        : d.capping_player;
-      return `<tr>
-        <td>${d.map_name}<span class="map-links">${links}</span></td>
-        <td>${time}</td><td>${ago}</td>
-        <td class="player">${player}</td>
-        <td>${d.caps_to_win}</td>
-      </tr>`;
-    }).join('');
-    document.getElementById('stats-body').innerHTML = rows;
-  }
+      <table class="table" id="mapsTable">
+        <colgroup>
+          <col style="width: 400px"> <!-- Map Name -->
+          <col>
+          <col>
+          <col>
+          <col>
+          <col>
+        </colgroup>
+        <thead>
+          <tr>
+            <th data-sort="map_name" data-type="string">Map Name</th>
+            <th data-sort="record_time" data-type="numeric">Record Time</th>
+            <th data-sort="timestamp" data-type="numeric">Set</th>
+            <th data-sort="capping_player" data-type="string">Capping Player</th>
+            <th data-sort="difficulty" data-type="string">Difficulty</th>
+            <th data-sort="balls_req" data-type="numeric">Balls Required</th>
+          </tr>
+        </thead>
+        <tbody id="mapsTableBody">
+          <!-- Data rows will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-  function createList(v) {
-    const ul = document.createElement('ul');
-    if (Array.isArray(v)) {
-      v.forEach(i=>{
-        const li = document.createElement('li');
-        if (i && typeof i==='object') { li.appendChild(createList(i)); }
-        else { li.textContent = i; }
-        ul.appendChild(li);
-      });
-    } else {
-      Object.entries(v).forEach(([k,val])=>{
-        const li = document.createElement('li');
-        if (val && typeof val==='object') {
-          li.textContent = k+':';
-          li.appendChild(createList(val));
-        } else {
-          li.textContent = `${k}: ${val}`;
-        }
-        ul.appendChild(li);
-      });
-    }
-    return ul;
-  }
+  <!-- Leaderboard page -->
+  <div id="leaderboardPage" style="display: none;">
+    <div id="leaderboardContainer"></div>
+  </div>
 
-  document.getElementById('replay-form').onsubmit = async e => {
-    e.preventDefault();
-    const form = e.target, uuid = form.uuid.value;
-    const res = await fetch('/replay', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({uuid})
-    });
-    const data = await res.json();
-    const respDiv = document.getElementById('response');
-    respDiv.innerHTML = '';
-    respDiv.appendChild(createList(data));
-    loadStats();
-  };
+  <!-- Modal for Replay Validation -->
+  <div id="uploadModal" class="modal">
+    <div class="modal-content">
+      <h2>Check Replay Data</h2>
+      <div class="modal-form">
+        <input type="url" id="replayUrlInput" placeholder="Enter replay URL, UUID URL, or Raw UUID..." class="url-input">
+        <div class="modal-buttons">
+          <button id="submitReplayUrl" class="submit-button">Submit</button>
+          <button id="cancelUpload" class="cancel-button">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  window.onload = loadStats;
-  </script>
+  <script type="module" src="/static/home.0bd5a90b.js"></script>
 </body>
 </html>
