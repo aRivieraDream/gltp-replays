@@ -5,6 +5,11 @@ docker run -p 8000:8000 \
   $(docker build -q .)
 ```
 
+For Windows powershell run 
+```
+docker run -p 8000:8000 -v "${PWD}/data:/app/data" $(docker build -q .)
+```
+
 # API Examples
 
 ## `POST /replay`: Submit a replay
