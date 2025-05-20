@@ -5,20 +5,17 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse
 
 from fastapi_utils.tasks import repeat_every
 
 from maps import get_spreadsheet_maps
 from replays import process_unprocessed_replays, get_replay_details, retrieve_replay_data
 import jsonutil
-from starlette.responses import Response
-from starlette.status import HTTP_404_NOT_FOUND
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
-STATIC_ROOT = (Path(__file__).parent / "static").resolve()
 
 DATA_DIR = Path("data")
 REPLAYS_DIR = DATA_DIR / "replays"
@@ -166,17 +163,3 @@ async def get_stats(
             result[uid] = data
 
     return result
-
-@app.get("/GLTP")
-@app.get("/GLTP/")
-async def redirect_gltp():
-    return RedirectResponse(url="/")
-
-@app.get("/{full_path:path}")
-async def serve_static_catchall(full_path: str):
-    path = (STATIC_ROOT / full_path).resolve()
-    if not STATIC_ROOT in path.parents:
-        return Response("Forbidden", status_code=403)
-    if path.is_file():
-        return FileResponse(path)
-    return Response("Not Found", status_code=HTTP_404_NOT_FOUND)
