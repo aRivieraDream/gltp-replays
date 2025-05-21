@@ -5,3 +5,6 @@ httpx
 
 fastapi-utils
 typing_inspect  # implicit fastapi-utils dep
+
+selenium>=4.0.0
+rapidfuzz>=3.0.0

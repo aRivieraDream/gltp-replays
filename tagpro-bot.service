@@ -1,0 +1,15 @@
+[Unit]
+Description=TagPro Game Bot Service
+After=network.target
+
+[Service]
+Type=simple
+User=pierce
+WorkingDirectory=/Users/pierce/Projects/service/pythonScripts/bot
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/local/bin/python3 leader.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target 
