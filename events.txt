@@ -219,3 +219,116 @@
 2025-05-20 19:14:29 - INFO - (Red) Ready balls: 1
 2025-05-20 19:14:29 - INFO - Lobby Players: {'red-team': [{'location': 'In a Game', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
 2025-05-20 19:14:29 - INFO - Game Running: gZMefHggggtaiaaaJraaksaaauaaajTE
+2025-05-20 20:03:32 - INFO - (Red) Ready balls: 0
+2025-05-20 20:03:32 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': []}
+2025-05-20 20:03:32 - INFO - End of game: None
+2025-05-20 20:03:32 - INFO - Chat: {'auth': None, 'from': None, 'message': 'Some Ball has joined the group.', 'to': 'group'}
+2025-05-20 20:03:34 - INFO - Chat: {'color': '#E7E700', 'from': None, 'message': 'Now playing private games. Up to 20 players can enter your game, there is no limit on spectators!', 'to': 'group'}
+2025-05-20 20:03:34 - INFO - (Red) Ready balls: 0
+2025-05-20 20:03:34 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': [{'location': 'In Here · Leader', 'name': 'Some Ball'}]}
+2025-05-20 20:03:34 - INFO - Empty lobby, reverting to default settings.
+2025-05-20 20:03:34 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'GG. Loading next map. Please return to lobby.', 'to': 'group'}
+2025-05-20 20:03:34 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'Welcome!', 'to': 'group'}
+2025-05-20 20:03:34 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': "Drag yourself into Red & click 'Join Game'", 'to': 'group'}
+2025-05-20 20:03:35 - INFO - (Red) Ready balls: 0
+2025-05-20 20:03:35 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:03:35 - INFO - Empty lobby, reverting to default settings.
+2025-05-20 20:06:29 - INFO - (Red) Ready balls: 0
+2025-05-20 20:06:29 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': [{'location': '???', 'name': 'Valerian'}]}
+2025-05-20 20:06:29 - INFO - Chat: {'auth': True, 'from': None, 'message': 'Valerian has joined the group.', 'to': 'group'}
+2025-05-20 20:06:31 - INFO - (Red) Ready balls: 0
+2025-05-20 20:06:31 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': [{'location': 'In Here', 'name': 'Valerian'}]}
+2025-05-20 20:06:31 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'Welcome!', 'to': 'group'}
+2025-05-20 20:06:31 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': "Drag yourself into Red & click 'Join Game'", 'to': 'group'}
+2025-05-20 20:06:32 - INFO - (Red) Ready balls: 1
+2025-05-20 20:06:32 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:06:33 - INFO - Set preset: gZMefHmtggtaiaaaJraaksaaaE
+2025-05-20 20:06:35 - INFO - Launched preset: gZMefHmtggtaiaaaJraaksaaaE
+2025-05-20 20:06:42 - INFO - Game UUID: 14abf9d7-5d05-4b3a-9c8c-3aa082e071e5
+2025-05-20 20:06:49 - INFO - (Red) Ready balls: 1
+2025-05-20 20:06:49 - INFO - Lobby Players: {'red-team': [{'location': 'In a Game', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:06:49 - INFO - Game Running: gZMefHmtggtaiaaaJraaksaaaE
+2025-05-20 20:11:15 - INFO - End of game: gZMefHmtggtaiaaaJraaksaaaE
+2025-05-20 20:11:15 - INFO - Set preset: gZMefGOUggtaiaaaJyaraaksaaamaaaE
+2025-05-20 20:11:17 - INFO - Launched preset: gZMefGOUggtaiaaaJyaraaksaaamaaaE
+2025-05-20 20:11:23 - INFO - (Red) Ready balls: 0
+2025-05-20 20:11:23 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': []}
+2025-05-20 20:11:23 - INFO - End of game: gZMefGOUggtaiaaaJyaraaksaaamaaaE
+2025-05-20 20:11:37 - INFO - Set preset: gZMefHdvggtaiaaaJyaraaksaaamaaapaE
+2025-05-20 20:11:47 - INFO - Game Running: gZMefGOUggtaiaaaJyaraaksaaamaaaE
+2025-05-20 20:11:49 - INFO - Game UUID: c081ec1c-b789-43d0-b79f-e88b57c21347
+2025-05-20 20:11:51 - INFO - (Red) Ready balls: 1
+2025-05-20 20:11:51 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': '??? · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:11:51 - INFO - Game Running: gZMefGOUggtaiaaaJyaraaksaaamaaaE
+2025-05-20 20:11:53 - INFO - (Red) Ready balls: 1
+2025-05-20 20:11:53 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:12:10 - INFO - (Red) Ready balls: 1
+2025-05-20 20:12:10 - INFO - Lobby Players: {'red-team': [{'location': '???', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:12:11 - INFO - Game Running: gZMefGOUggtaiaaaJyaraaksaaamaaaE
+2025-05-20 20:12:16 - INFO - (Red) Ready balls: 1
+2025-05-20 20:12:16 - INFO - Lobby Players: {'red-team': [{'location': 'In a Game', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:12:48 - INFO - End of game: gZMefGOUggtaiaaaJyaraaksaaamaaaE
+2025-05-20 20:12:49 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'GG. Loading next map. Please return to lobby.', 'to': 'group'}
+2025-05-20 20:12:56 - INFO - Set preset: gZMefEEmggtaiaaaJraaksaaamaaaE
+2025-05-20 20:12:58 - INFO - Launched preset: gZMefEEmggtaiaaaJraaksaaamaaaE
+2025-05-20 20:13:04 - INFO - (Red) Ready balls: 0
+2025-05-20 20:13:04 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': []}
+2025-05-20 20:13:04 - INFO - End of game: gZMefEEmggtaiaaaJraaksaaamaaaE
+2025-05-20 20:13:19 - INFO - Set preset: gZMefFZyggtdiaaaJyaraaksaaamaaaE
+2025-05-20 20:13:26 - INFO - Game Running: gZMefEEmggtaiaaaJraaksaaamaaaE
+2025-05-20 20:13:28 - INFO - Game UUID: d23d5fe0-9b57-477e-8364-dab7f8b55bdd
+2025-05-20 20:13:30 - INFO - (Red) Ready balls: 1
+2025-05-20 20:13:30 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': '??? · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:13:30 - INFO - Game Running: gZMefEEmggtaiaaaJraaksaaamaaaE
+2025-05-20 20:13:32 - INFO - (Red) Ready balls: 1
+2025-05-20 20:13:32 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:13:56 - INFO - End of game: gZMefEEmggtaiaaaJraaksaaamaaaE
+2025-05-20 20:13:57 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'GG. Loading next map. Please return to lobby.', 'to': 'group'}
+2025-05-20 20:14:06 - INFO - Set preset: gZMefGSNggtaiaaaJyaraaksaaamaaapaE
+2025-05-20 20:14:08 - INFO - Launched preset: gZMefGSNggtaiaaaJyaraaksaaamaaapaE
+2025-05-20 20:14:14 - INFO - Game UUID: f2a3b4b9-9194-45ab-9927-5e1a0a26a6df
+2025-05-20 20:14:21 - INFO - (Red) Ready balls: 1
+2025-05-20 20:14:21 - INFO - Lobby Players: {'red-team': [{'location': 'In a Game', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:14:21 - INFO - Game Running: gZMefGSNggtaiaaaJyaraaksaaamaaapaE
+2025-05-20 20:14:22 - INFO - (Red) Ready balls: 1
+2025-05-20 20:14:22 - INFO - Lobby Players: {'red-team': [{'location': '???', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:14:24 - INFO - (Red) Ready balls: 1
+2025-05-20 20:14:24 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:14:24 - INFO - End of game: gZMefGSNggtaiaaaJyaraaksaaamaaapaE
+2025-05-20 20:14:25 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'GG. Loading next map. Please return to lobby.', 'to': 'group'}
+2025-05-20 20:14:29 - INFO - Set preset: gZMefHlEggtaiaaaJyaraaksaaamaaEYE
+2025-05-20 20:14:31 - INFO - Launched preset: gZMefHlEggtaiaaaJyaraaksaaamaaEYE
+2025-05-20 20:14:37 - INFO - Game UUID: 0f83c0ee-83d9-4e71-bf53-a6b58d064e8c
+2025-05-20 20:14:44 - INFO - (Red) Ready balls: 1
+2025-05-20 20:14:44 - INFO - Lobby Players: {'red-team': [{'location': 'In a Game', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:14:44 - INFO - Game Running: gZMefHlEggtaiaaaJyaraaksaaamaaEYE
+2025-05-20 20:16:01 - INFO - (Red) Ready balls: 1
+2025-05-20 20:16:01 - INFO - Lobby Players: {'red-team': [{'location': '???', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:16:04 - INFO - End of game: gZMefHlEggtaiaaaJyaraaksaaamaaEYE
+2025-05-20 20:16:04 - INFO - (Red) Ready balls: 1
+2025-05-20 20:16:04 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:16:06 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'GG. Loading next map. Please return to lobby.', 'to': 'group'}
+2025-05-20 20:16:08 - INFO - Set preset: gZMefGtBggtuiaaaJyaraaksaaamaaaE
+2025-05-20 20:16:10 - INFO - Launched preset: gZMefGtBggtuiaaaJyaraaksaaamaaaE
+2025-05-20 20:16:16 - INFO - Game UUID: 2195d56b-c0f7-4864-88e9-7018058aa604
+2025-05-20 20:16:22 - INFO - (Red) Ready balls: 1
+2025-05-20 20:16:22 - INFO - Lobby Players: {'red-team': [{'location': 'In a Game', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:16:22 - INFO - Game Running: gZMefGtBggtuiaaaJyaraaksaaamaaaE
+2025-05-20 20:17:23 - INFO - (Red) Ready balls: 1
+2025-05-20 20:17:23 - INFO - Lobby Players: {'red-team': [{'location': '???', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:17:26 - INFO - (Red) Ready balls: 1
+2025-05-20 20:17:26 - INFO - Lobby Players: {'red-team': [{'location': 'In a Game', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:18:40 - INFO - (Red) Ready balls: 1
+2025-05-20 20:18:40 - INFO - Lobby Players: {'red-team': [{'location': '???', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:18:43 - INFO - (Red) Ready balls: 1
+2025-05-20 20:18:43 - INFO - Lobby Players: {'red-team': [{'location': 'In a Game', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:19:59 - INFO - (Red) Ready balls: 1
+2025-05-20 20:19:59 - INFO - Lobby Players: {'red-team': [{'location': '???', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:20:02 - INFO - End of game: gZMefGtBggtuiaaaJyaraaksaaamaaaE
+2025-05-20 20:20:02 - INFO - (Red) Ready balls: 1
+2025-05-20 20:20:02 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:20:04 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'GG. Loading next map. Please return to lobby.', 'to': 'group'}
+2025-05-20 20:20:05 - INFO - (Red) Ready balls: 0
+2025-05-20 20:20:05 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-05-20 20:20:05 - INFO - Empty lobby, reverting to default settings.
+2025-05-20 20:20:05 - INFO - Chat: {'auth': True, 'from': None, 'message': 'Valerian has left the group.', 'to': 'group'}

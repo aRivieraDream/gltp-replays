@@ -7,6 +7,7 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: always
     environment:
       - PYTHONDONTWRITEBYTECODE=1
