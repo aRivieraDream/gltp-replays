@@ -263,12 +263,12 @@ class DriverAdapter:
 
 class TagproBot:
     URL = "https://tagpro.koalabeast.com/groups/"
-    room_name = "Gravity test"
+    room_name = "Gravity and Fun Mini Games"
     default_map_settings = {"category": None, "difficulty": (1.0, 3.5), "minfun": 3.0}
     default_lobby_settings = {"region": "US East"}
     moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian"]
     restricted_names = ["Fap", "Ptuh"]
-    region_map = {"east": "US East", "central": "US Central", "west": "US West", "eu": "Europe", "oce": "Oceanic"}
+    region_map = {"east": "US East", "central": "US Central", "west": "US West", "eu": "Europe", "oce": "Oceanic", "oceanic": "Oceanic"}
 
     def __init__(self, adapter: DriverAdapter):
         self.adapter = adapter
