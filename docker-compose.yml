@@ -7,11 +7,10 @@ services:
     volumes:
       - .:/app
       - ./data:/app/data
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /etc/ssl:/etc/ssl
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/www:/var/www/html
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: always
     environment:
       - PYTHONDONTWRITEBYTECODE=1
