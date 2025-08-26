@@ -387,12 +387,12 @@ class TagproBot:
         if current_url == "https://tagpro.koalabeast.com/games/find":
             if self.finding_game_start_time is None:
                 self.finding_game_start_time = time.time()
-            time_waiting = self.finding_game_start_time - time.time()
-            if time_waiting > 1:
-                print("time finding game:", time_waiting)
-            # TODO: auto create new group if stuck
-            # - Message group new URL
-            # - change topic
+            time_waiting = time.time() - self.finding_game_start_time
+            if time_waiting > 300:  # Wait 5 minutes before giving up
+                print(f"Stuck finding game for {time_waiting:.1f} seconds, creating new group")
+                self.adapter.driver.get("https://tagpro.koalabeast.com/groups/")
+                return
+            print(f"Finding game... waiting {time_waiting:.1f} seconds")
             return
         self.finding_game_start_time = None 
 
