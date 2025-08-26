@@ -16,9 +16,9 @@ echo -e "${BLUE}=== TagPro VM Setup for GitHub Actions ===${NC}"
 echo "This script will set up your VM for automatic deployment via GitHub Actions"
 echo ""
 
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then
-    echo -e "${RED}Please run this script as root (use sudo)${NC}"
+# Check if user can sudo
+if ! sudo -n true 2>/dev/null; then
+    echo -e "${RED}Please ensure you can run sudo commands${NC}"
     exit 1
 fi
 
@@ -101,9 +101,9 @@ fi
 
 # Create SSH key for GitHub Actions
 echo -e "${YELLOW}Setting up SSH for GitHub Actions...${NC}"
-if [ ! -f /root/.ssh/id_rsa ]; then
+if [ ! -f ~/.ssh/id_rsa ]; then
     echo -e "${YELLOW}Generating SSH key pair...${NC}"
-    ssh-keygen -t rsa -b 4096 -f /root/.ssh/id_rsa -N ""
+    ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
     echo -e "${GREEN}SSH key generated${NC}"
 else
     echo -e "${GREEN}SSH key already exists${NC}"
@@ -114,7 +114,7 @@ echo ""
 echo -e "${GREEN}=== SSH Public Key for GitHub Actions ===${NC}"
 echo "Copy this public key and add it to your GitHub repository secrets as VM_SSH_KEY:"
 echo ""
-cat /root/.ssh/id_rsa.pub
+cat ~/.ssh/id_rsa.pub
 echo ""
 
 # Create a simple status check script
@@ -162,9 +162,9 @@ echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo "1. Add the SSH public key above to your GitHub repository secrets as VM_SSH_KEY"
 echo "2. Add these secrets to your GitHub repository:"
-echo "   - VM_SSH_KEY: The private key content from /root/.ssh/id_rsa"
+echo "   - VM_SSH_KEY: The private key content from ~/.ssh/id_rsa"
 echo "   - VM_HOST: Your VM's IP address or hostname"
-echo "   - VM_USER: root (or your preferred user)"
+echo "   - VM_USER: $(whoami) (your current user)"
 echo "3. Start your service: systemctl start tagpro.service"
 echo "4. Push to main branch to trigger automatic deployment"
 echo ""

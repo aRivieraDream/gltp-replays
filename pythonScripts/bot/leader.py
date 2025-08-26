@@ -309,7 +309,7 @@ class DriverAdapter:
 
 class TagproBot:
     URL = "https://tagpro.koalabeast.com/groups/"
-    room_name = "Testing Room Functionality - please ignore"
+    room_name = "Tryhard Gravity Lobby"
     default_map_settings = {"category": None, "difficulty": (1.0, 3.5), "minfun": 3.0}
     default_lobby_settings = {"region": "US Central"}
     moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian", "3"]
@@ -602,10 +602,7 @@ class TagproBot:
             # When game is inactive, reset all settings
             self.settings = dict(self.default_map_settings)
             self.lobby_settings = dict(self.default_lobby_settings)
-            self.adapter.send_ws_message(["setting", {"name": "redTeamName", "value": "Good Team"}])
-            self.adapter.send_ws_message(["setting", {"name": "blueTeamName", "value": "Bad Team"}])
-            self.adapter.send_ws_message(["setting", {"name": "ghostMode", "value": "noPlayerOrMarsCollisions"}])
-            self.adapter.send_ws_message(["setting",{"name":"regions","value":"US Central"}])
+            
             return False
         self.current_game_preset = self.current_preset
         self.current_preset = None

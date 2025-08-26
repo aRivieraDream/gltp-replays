@@ -28,8 +28,8 @@ jobs:
           set -e
           echo "Starting deployment..."
           
-          # Navigate to project directory
-          cd /root/service
+                  # Navigate to project directory
+        cd /home/${{ secrets.VM_USER }}/gltp-replays
           
           # Get current commit hash
           OLD_HASH=$(git rev-parse HEAD)
