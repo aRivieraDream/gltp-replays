@@ -461,8 +461,6 @@ class TagproBot:
         if event_details.get("auth") and event_details.get("name"):
             self.authed_members[event_details["name"]] = event_details["id"]
         elif self.disallow_someballs:
-            self.adapter.send_chat_msg(f"SomeBalls are not currently allowed to play with this group.")
-            self.adapter.send_chat_msg(f"To reallow someballs, type 'ALLOW SOMEBALLS' in chat.")
             self.adapter.send_ws_message(["kick", event_details["id"]])
         self.handle_team_change(event_details)
 
