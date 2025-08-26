@@ -24,11 +24,11 @@ fi
 
 # Update system packages
 echo -e "${YELLOW}Updating system packages...${NC}"
-apt-get update && apt-get upgrade -y
+sudo apt-get update && sudo apt-get upgrade -y
 
 # Install required packages
 echo -e "${YELLOW}Installing required packages...${NC}"
-apt-get install -y \
+sudo apt-get install -y \
     curl \
     git \
     htop \
@@ -39,7 +39,7 @@ apt-get install -y \
 if ! command -v docker &> /dev/null; then
     echo -e "${YELLOW}Installing Docker...${NC}"
     curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
+    sudo sh get-docker.sh
     rm get-docker.sh
 else
     echo -e "${GREEN}Docker is already installed${NC}"
@@ -48,19 +48,19 @@ fi
 # Install Docker Compose if not already installed
 if ! command -v docker-compose &> /dev/null; then
     echo -e "${YELLOW}Installing Docker Compose...${NC}"
-    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
+    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
 else
     echo -e "${GREEN}Docker Compose is already installed${NC}"
 fi
 
 # Create log directory
 echo -e "${YELLOW}Setting up logging...${NC}"
-mkdir -p /var/log
-touch /var/log/tagpro-deployments.log
+sudo mkdir -p /var/log
+sudo touch /var/log/tagpro-deployments.log
 
 # Set up log rotation
-cat > /etc/logrotate.d/tagpro << EOF
+sudo tee /etc/logrotate.d/tagpro > /dev/null << EOF
 /var/log/tagpro-deployments.log {
     daily
     missingok
@@ -80,22 +80,22 @@ chmod +x scripts/*.sh
 echo -e "${YELLOW}Setting up systemd service...${NC}"
 
 # Copy service file to systemd directory
-cp tagpro.service /etc/systemd/system/
+sudo cp tagpro.service /etc/systemd/system/
 
 # Reload systemd
-systemctl daemon-reload
+sudo systemctl daemon-reload
 
 # Enable service
 echo -e "${YELLOW}Enabling service...${NC}"
-systemctl enable tagpro.service
+sudo systemctl enable tagpro.service
 
 # Set up firewall (if ufw is available)
 if command -v ufw &> /dev/null; then
     echo -e "${YELLOW}Setting up firewall...${NC}"
-    ufw allow 22/tcp    # SSH
-    ufw allow 80/tcp    # HTTP
-    ufw allow 443/tcp   # HTTPS
-    ufw --force enable
+    sudo ufw allow 22/tcp    # SSH
+    sudo ufw allow 80/tcp    # HTTP
+    sudo ufw allow 443/tcp   # HTTPS
+    sudo ufw --force enable
     echo -e "${GREEN}Firewall configured${NC}"
 fi
 
@@ -119,7 +119,7 @@ echo ""
 
 # Create a simple status check script
 echo -e "${YELLOW}Creating status check script...${NC}"
-cat > /usr/local/bin/tagpro-status << 'EOF'
+sudo tee /usr/local/bin/tagpro-status > /dev/null << 'EOF'
 #!/bin/bash
 echo "=== TagPro Services Status ==="
 echo ""
@@ -127,25 +127,25 @@ echo "Docker containers:"
 docker-compose ps
 echo ""
 echo "Systemd service:"
-systemctl status tagpro.service --no-pager -l
+sudo systemctl status tagpro.service --no-pager -l
 echo ""
 echo "Recent deployment logs:"
-tail -10 /var/log/tagpro-deployments.log
+sudo tail -10 /var/log/tagpro-deployments.log
 EOF
 
-chmod +x /usr/local/bin/tagpro-status
+sudo chmod +x /usr/local/bin/tagpro-status
 
 # Create a simple restart script
 echo -e "${YELLOW}Creating restart script...${NC}"
-cat > /usr/local/bin/tagpro-restart << 'EOF'
+sudo tee /usr/local/bin/tagpro-restart > /dev/null << 'EOF'
 #!/bin/bash
-cd /root/service
+cd /home/$USER/gltp-replays
 docker-compose down
 docker-compose up -d --build
 echo "Services restarted"
 EOF
 
-chmod +x /usr/local/bin/tagpro-restart
+sudo chmod +x /usr/local/bin/tagpro-restart
 
 # Final setup
 echo ""
