@@ -309,7 +309,7 @@ class DriverAdapter:
 
 class TagproBot:
     URL = "https://tagpro.koalabeast.com/groups/"
-    room_name = "Tryhard Gravity Lobby"
+    room_name = "Tryhard Gravity Lobby2"
     default_map_settings = {"category": None, "difficulty": (1.0, 3.5), "minfun": 3.0}
     default_lobby_settings = {"region": "US Central"}
     moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian", "3"]
@@ -454,8 +454,14 @@ class TagproBot:
         else:
             event_logger.info(f"Game Running: {self.current_game_preset}")
             self.ensure_in_group(self.room_name)
-            if not self.game_is_active:
+            # Only set game as active if there are actually players ready
+            if not self.game_is_active and self.num_ready_balls > 0:
                 self.game_is_active = True
+                event_logger.info(f"Game activated with {self.num_ready_balls} ready players")
+            elif self.game_is_active and self.num_ready_balls == 0:
+                # If game was active but no players are ready, keep it active for a bit
+                # This prevents immediate game ending when players are still joining
+                pass
 
     def handle_member(self, event_details):
         if event_details.get("auth") and event_details.get("name"):
@@ -473,11 +479,28 @@ class TagproBot:
         self.lobby_players = lobby_players
         event_logger.info(f"(Red) Ready balls: {self.num_ready_balls}")
         event_logger.info(f"Lobby Players: {lobby_players}")
+        event_logger.info(f"Game active: {self.game_is_active}, Ready players: {self.num_ready_balls}")
 
         # reset to default if no users
         if self.num_in_lobby == 1:
             self.settings = dict(self.default_map_settings)
             event_logger.info("Empty lobby, reverting to default settings.")
+            
+        # If game is active but no players are ready, wait a bit before ending
+        if self.game_is_active and self.num_ready_balls == 0:
+            # Give players time to join before ending the game
+            if not hasattr(self, 'empty_game_start_time'):
+                self.empty_game_start_time = time.time()
+                event_logger.info("Game has no ready players, starting empty game timer")
+            elif time.time() - self.empty_game_start_time > 60:  # Wait 1 minute
+                event_logger.info("Game has been empty for 1 minute, ending game")
+                self.game_is_active = False
+                self.adapter.send_chat_msg("Game ended due to no players. Please return to lobby.")
+                delattr(self, 'empty_game_start_time')
+        else:
+            # Reset the empty game timer if players are present
+            if hasattr(self, 'empty_game_start_time'):
+                delattr(self, 'empty_game_start_time')
 
     def handle_chat(self, event_details):
         msg = event_details.get("message", "")
