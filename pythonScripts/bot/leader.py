@@ -372,6 +372,7 @@ class TagproBot:
 
     @property
     def num_ready_balls(self):
+        self.adapter.send_chat_msg(f"Lobby Players: {self.lobby_players}")
         if self.lobby_players is None:
             return 0
         return len(self.lobby_players["red-team"])
@@ -448,10 +449,26 @@ class TagproBot:
 
     def handle_game(self, event_details):
         if event_details.get("gameId") is None:
-            event_logger.info(f"End of game: {self.current_game_preset}")
-            self.game_is_active = False
-            self.adapter.send_chat_msg("GG. Loading next map. Please return to lobby.")
+            # Don't immediately end the game - give it time to load
+            if self.game_is_active:
+                # Start a timer for ending the game
+                if not hasattr(self, 'game_end_timer_start'):
+                    self.game_end_timer_start = time.time()
+                    event_logger.info("GameId is None, starting end game timer")
+                elif time.time() - self.game_end_timer_start > 10:  # Wait 10 seconds
+                    # Game has been without gameId for 10 seconds, end it
+                    event_logger.info(f"End of game: {self.current_game_preset}")
+                    self.game_is_active = False
+                    self.adapter.send_chat_msg("GG. Loading next map. Please return to lobby.")
+                    delattr(self, 'game_end_timer_start')
+            else:
+                # Game wasn't active, so this is just normal loading
+                pass
         else:
+            # Game has a gameId, reset the end timer and ensure game is active
+            if hasattr(self, 'game_end_timer_start'):
+                delattr(self, 'game_end_timer_start')
+                
             event_logger.info(f"Game Running: {self.current_game_preset}")
             self.ensure_in_group(self.room_name)
             # Only set game as active if there are actually players ready
@@ -629,6 +646,7 @@ class TagproBot:
         self.current_preset = None
         self.adapter.send_ws_message(["groupPlay"])
         event_logger.info(f"Launched preset: {self.current_game_preset}")
+        event_logger.info("Waiting for game to load and players to join...")
         time.sleep(5)
         return True
 
@@ -665,7 +683,7 @@ class TagproBot:
             self.adapter.process_ws_events()
 
             if launched_new:
-                time.sleep(5)
+                time.sleep(10)
                 try:
                     self.adapter.send_chat_msg(self.game_str)
                 except Exception as e:
@@ -678,7 +696,7 @@ class TagproBot:
             # ensure random preset loaded before launching
             if i % 10 == 0 and not self.adapter.is_game_active() and self.num_in_lobby != 1:
                 self.load_random_preset()
-                time.sleep(2)
+                time.sleep(5)
                 launched_new = self.maybe_launch()
 
             i += 1
