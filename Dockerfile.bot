@@ -1,0 +1,38 @@
+# Use an official Python image (force x86_64)
+FROM --platform=linux/amd64 python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies for Selenium
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    unzip \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Chromium and dependencies
+RUN apt-get update \
+    && apt-get install -y chromium chromium-driver \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy bot requirements and install Python dependencies
+COPY pythonScripts/bot/requirements.txt ./bot-requirements.txt
+RUN pip install --no-cache-dir -r bot-requirements.txt
+
+# Copy bot source code
+COPY pythonScripts/bot/ ./bot/
+
+# Copy shared utilities that the bot might need
+COPY maps.py .
+COPY jsonutil.py .
+
+# Create data directory
+RUN mkdir -p data
+
+# Set display for Selenium
+ENV DISPLAY=:99
+
+# Run the bot
+CMD ["python", "/app/bot/leader.py"]

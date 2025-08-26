@@ -124,7 +124,53 @@ class DriverAdapter:
         options.add_argument("--disable-popup-blocking")
         options.set_capability("goog:chromeOptions", {"prefs": {"profile.default_content_setting_values.popups": 0}})
         options.set_capability("unhandledPromptBehavior", "dismiss")
-        self.driver = webdriver.Chrome(options=options)
+        # Configure webdriver for cross-platform compatibility
+        from selenium.webdriver.chrome.service import Service
+        import platform
+        import os
+        
+        # Add container-specific options
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--remote-debugging-port=9222")
+        
+        # Platform-specific browser paths
+        if platform.system() == "Darwin":  # macOS
+            chrome_paths = [
+                "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                "/usr/bin/google-chrome",
+                "/usr/bin/chromium"
+            ]
+        else:  # Linux
+            chrome_paths = [
+                "/usr/bin/chromium",
+                "/usr/bin/chromium-browser",
+                "/usr/bin/google-chrome"
+            ]
+        
+        # Try each path until one works
+        for path in chrome_paths:
+            if os.path.exists(path):
+                try:
+                    print(f"Trying browser at: {path}")
+                    service = Service(executable_path=path)
+                    self.driver = webdriver.Chrome(options=options, service=service)
+                    print(f"Successfully started browser from: {path}")
+                    break
+                except Exception as e:
+                    print(f"Failed to start browser from {path}: {e}")
+                    continue
+        else:
+            # If no path worked, try letting Selenium find it automatically
+            try:
+                print("Trying automatic browser detection...")
+                self.driver = webdriver.Chrome(options=options)
+                print("Successfully started browser with automatic detection")
+            except Exception as e:
+                print(f"Automatic detection failed: {e}")
+                raise Exception("Could not start any webdriver")
         self.inject_ws_intercept()
         self.inject_auto_close_alerts()
 
@@ -263,11 +309,11 @@ class DriverAdapter:
 
 class TagproBot:
     URL = "https://tagpro.koalabeast.com/groups/"
-    room_name = "SomeBall64 Check Out Our 2nd Bot"
+    room_name = "Testing Room Functionality - please ignore"
     default_map_settings = {"category": None, "difficulty": (1.0, 3.5), "minfun": 3.0}
-    default_lobby_settings = {"region": "US East"}
-    moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian"]
-    restricted_names = ["Fap", "Ptuh"]
+    default_lobby_settings = {"region": "US Central"}
+    moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian", "3"]
+    restricted_names = ["Fap", "Ptuh", "marvin"]
     region_map = {"east": "US East", "central": "US Central", "west": "US West", "eu": "Europe", "oce": "Oceanic", "oceanic": "Oceanic"}
 
     def __init__(self, adapter: DriverAdapter):
@@ -291,6 +337,8 @@ class TagproBot:
         self.adapter.event_handlers["ws_member"] = self.handle_member
         self.adapter.event_handlers["ws_removed"] = self.handle_team_change
         self.adapter.event_handlers["ws_game"] = self.handle_game
+
+        self.disallow_someballs = False
 
     @property
     def game_str(self):
@@ -382,6 +430,10 @@ class TagproBot:
             self.adapter.send_ws_message(["setting", {"name": "serverSelect", "value": "false"}])
             self.adapter.send_ws_message(["setting", {"name": "regions", "value": self.lobby_settings["region"]}])
             self.adapter.send_ws_message(["setting", {"name": "discoverable", "value": "true"}])
+            self.adapter.send_ws_message(["setting", {"name": "redTeamName", "value": "Good Team"}])
+            self.adapter.send_ws_message(["setting", {"name": "blueTeamName", "value": "Bad Team"}])
+            self.adapter.send_ws_message(["setting", {"name": "ghostMode", "value": "noPlayerOrMarsCollisions"}])
+            
             if self.adapter.my_id is not None:
                 self.adapter.send_ws_message(["team", {"id": self.adapter.my_id, "team": 3}])
             try:
@@ -408,6 +460,10 @@ class TagproBot:
     def handle_member(self, event_details):
         if event_details.get("auth") and event_details.get("name"):
             self.authed_members[event_details["name"]] = event_details["id"]
+        elif self.disallow_someballs:
+            self.adapter.send_chat_msg(f"SomeBalls are not currently allowed to play with this group.")
+            self.adapter.send_chat_msg(f"To reallow someballs, type 'ALLOW SOMEBALLS' in chat.")
+            self.adapter.send_ws_message(["kick", event_details["id"]])
         self.handle_team_change(event_details)
 
     def handle_team_change(self, _):
@@ -434,8 +490,11 @@ class TagproBot:
             return
         event_logger.info("Chat: " + str(event_details))
         if event_details.get("from") is None and "has joined the group" in msg:
+            # determine if the player who joined is logged in
+
+
             time.sleep(1)
-            self.adapter.send_chat_msg("Welcome!\nDrag yourself into Red & click 'Join Game'")
+            self.adapter.send_chat_msg("Welcome!\nJoin the Good Team and click 'Join Game'")
         elif "message" in event_details:
             sender = event_details["from"]
 
@@ -448,22 +507,32 @@ class TagproBot:
                     "Commands: HELP, SETTINGS, MAP, INFO <query>, LAUNCHNEW <preset> (<map_id>), "
                     "REGION east/central/west/eu/oce"
                 )
-            elif msg.startswith("LAUNCHNEW POOP"):
-                if event_details["auth"] and sender in self.moderator_names and sender in self.authed_members:
-                    self.adapter.send_ws_message(["kick", self.authed_members[event_details["from"]]])
+            elif msg.strip() == "PLAY":
+                self.adapter.send_ws_message(["team", {"id": self.adapter.my_id, "team": 3}])
+            elif msg.strip() == "ALLOW SOMEBALLS":
+                self.disallow_someballs = False
+                self.adapter.send_chat_msg("SomeBalls are now allowed to play with this group.")
+            elif msg.strip() == "BAN SOMEBALLS":
+                self.disallow_someballs = True
+                self.adapter.send_chat_msg("SomeBalls are now banned from playing with this group.")
+                self.adapter.send_chat_msg("Type 'ALLOW SOMEBALLS' to reallow them.")
             elif msg.startswith("LAUNCHNEW"):
-                preset = None
-                if len(msg.split()) == 2:
-                    preset = msg.split()[-1]
-                elif len(msg.split()) == 3 and default_float(msg.split()[2]):
-                    preset = inject_map_id_into_preset(msg.split()[1], msg.split()[2])
-                if preset and preset.startswith("gZ"):
-                    self.adapter.send_chat_msg("Ending current game...")
-                    time.sleep(2)
-                    self.adapter.send_ws_message(["endGame"])
-                    self.load_preset(preset)
-                    time.sleep(2)
-                    self.maybe_launch()
+                if event_details.get("auth") and (sender in self.authed_members) and (sender in self.moderator_names):
+                    preset = None
+                    if len(msg.split()) == 2:
+                        preset = msg.split()[-1]
+                    elif len(msg.split()) == 3 and default_float(msg.split()[2]):
+                        preset = inject_map_id_into_preset(msg.split()[1], msg.split()[2])
+                    if preset and preset.startswith("gZ"):
+                        self.adapter.send_chat_msg("Ending current game...")
+                        time.sleep(2)
+                        self.adapter.send_ws_message(["endGame"])
+                        self.load_preset(preset)
+                        time.sleep(2)
+                        self.maybe_launch()
+                else:
+                    self.adapter.send_chat_msg("Only group admins can launch new games. Please ask an admin to do this for you.")
+                    return
 
             elif msg.startswith("SETTINGS"):
                 self.handle_settings(msg)
@@ -530,6 +599,13 @@ class TagproBot:
 
     def maybe_launch(self):
         if self.adapter.is_game_active() or not self.num_ready_balls or self.current_preset is None:
+            # When game is inactive, reset all settings
+            self.settings = dict(self.default_map_settings)
+            self.lobby_settings = dict(self.default_lobby_settings)
+            self.adapter.send_ws_message(["setting", {"name": "redTeamName", "value": "Good Team"}])
+            self.adapter.send_ws_message(["setting", {"name": "blueTeamName", "value": "Bad Team"}])
+            self.adapter.send_ws_message(["setting", {"name": "ghostMode", "value": "noPlayerOrMarsCollisions"}])
+            self.adapter.send_ws_message(["setting",{"name":"regions","value":"US Central"}])
             return False
         self.current_game_preset = self.current_preset
         self.current_preset = None

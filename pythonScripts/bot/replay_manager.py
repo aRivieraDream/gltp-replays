@@ -18,26 +18,26 @@ def process_replays():
 
 def update_replays():
     is_updated = process_downloaded_replays(
-        replay_stats_path="replay_stats.json",
-        replay_download_dir="./replays"
+        replay_stats_path="data/replay_stats.json",
+        replay_download_dir="data/replays"
     )
     if is_updated:
-        push_replay_stats_to_leaderboard(replay_stats_path="replay_stats.json")
+        push_replay_stats_to_leaderboard(replay_stats_path="data/replay_stats.json")
 
     # download bot replays (if not already downloaded)
-    bot_logged_replays = [line.strip() for line in open("replay_uuids.txt").readlines() if line.strip()]
+    bot_logged_replays = [line.strip() for line in open("data/replay_uuids.txt").readlines() if line.strip()]
     download_replays(bot_logged_replays)
     # download manual entry replays (if not already downloaded)
-    manual_entry_replays = [line.strip() for line in open("manual_replay_uuids.txt").readlines() if line.strip()]
+    manual_entry_replays = [line.strip() for line in open("data/manual_replay_uuids.txt").readlines() if line.strip()]
     download_replays(manual_entry_replays)
 
     time.sleep(10)
 
 
 def download_replays(uuids):
-    downloaded = {f.name for f in os.scandir("./replays") if f.is_file()}
+    downloaded = {f.name for f in os.scandir("data/replays") if f.is_file()}
     try:
-        attempts = json.load(open("download_attempts.json"))
+        attempts = json.load(open("data/download_attempts.json"))
     except FileNotFoundError:
         attempts = {}
     for uid in set(uuids) - downloaded:
@@ -52,10 +52,10 @@ def download_replays(uuids):
         r = get_replay_data(uid)
         if r:
             print("success for", uid)
-            json.dump(r, open(f"./replays/{uid}", "w"))
+            json.dump(r, open(f"data/replays/{uid}", "w"))
         else:
             print("failure for", uid)
-    json.dump(attempts, open("download_attempts.json", "w"))
+    json.dump(attempts, open("data/download_attempts.json", "w"))
 
 
 def process_downloaded_replays(replay_stats_path, replay_download_dir):
@@ -101,7 +101,7 @@ def push_replay_stats_to_leaderboard(replay_stats_path):
     print("Push to leaderboard status code:", response.status_code)
 
 
-def get_wr_entry(map_id, replay_stats_path="replay_stats.json"):
+def get_wr_entry(map_id, replay_stats_path="data/replay_stats.json"):
     """load wr for map_id from replay_stats.json"""
     for _ in range(10):
         try:

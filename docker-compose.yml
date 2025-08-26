@@ -1,11 +1,15 @@
-version: '3'
+version: '3.8'
+
 services:
-  app:
-    build: .
+  # Web service - serves the leaderboard website and handles webhooks
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: tagpro-web
     expose:
       - "8000"
     volumes:
-      - .:/app
       - ./data:/app/data
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/ssl:/etc/nginx/ssl
@@ -19,8 +23,27 @@ services:
     networks:
       - app-network
 
+  # Bot service - manages TagPro games via Discord
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    container_name: tagpro-bot
+    volumes:
+      - ./data:/app/data
+      - ./pythonScripts/bot:/app/bot
+    restart: always
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    command: python /app/bot/leader.py
+    networks:
+      - app-network
+
+  # Nginx reverse proxy
   nginx:
     image: nginx:alpine
+    container_name: tagpro-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -29,7 +52,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/www:/var/www/html
     depends_on:
-      - app
+      - web
     restart: always
     networks:
       - app-network

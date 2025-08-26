@@ -1,0 +1,82 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.VM_SSH_KEY }}
+        
+    - name: Deploy to VM
+      run: |
+        # Add VM to known hosts
+        ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+        
+        # Execute deployment commands on VM
+        ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+          set -e
+          echo "Starting deployment..."
+          
+          # Navigate to project directory
+          cd /root/service
+          
+          # Get current commit hash
+          OLD_HASH=$(git rev-parse HEAD)
+          echo "Current commit: $OLD_HASH"
+          
+          # Fetch and pull latest changes
+          git fetch origin
+          git reset --hard origin/main
+          
+          # Get new commit hash
+          NEW_HASH=$(git rev-parse HEAD)
+          echo "New commit: $NEW_HASH"
+          
+          # Make scripts executable
+          chmod +x scripts/*.sh
+          
+          # Stop existing containers
+          echo "Stopping containers..."
+          docker-compose down
+          
+          # Build and start new containers
+          echo "Building and starting new containers..."
+          docker-compose up -d --build
+          
+          # Wait for services to be ready
+          echo "Waiting for services to be ready..."
+          sleep 15
+          
+          # Health check
+          echo "Performing health check..."
+          if curl -f http://localhost/ > /dev/null 2>&1; then
+            echo "✅ Deployment successful! Health check passed."
+            echo "Deployed commit: $NEW_HASH"
+          else
+            echo "❌ Health check failed. Rolling back..."
+            git reset --hard $OLD_HASH
+            docker-compose down
+            docker-compose up -d --build
+            exit 1
+          fi
+        EOF
+        
+    - name: Deployment Status
+      run: |
+        if [ $? -eq 0 ]; then
+          echo "✅ Deployment completed successfully!"
+        else
+          echo "❌ Deployment failed!"
+          exit 1
+        fi
