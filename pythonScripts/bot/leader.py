@@ -394,7 +394,7 @@ class TagproBot:
             # - Message group new URL
             # - change topic
             return
-        self.finding_game_start_time = None
+        self.finding_game_start_time = None 
 
         if current_url == "https://tagpro.koalabeast.com/groups/":
             group_items = self.adapter.find_elements("div.group-item")
