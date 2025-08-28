@@ -140,9 +140,25 @@ echo -e "${YELLOW}Creating restart script...${NC}"
 sudo tee /usr/local/bin/tagpro-restart > /dev/null << 'EOF'
 #!/bin/bash
 cd /home/$USER/gltp-replays
+
+echo "Stopping all services..."
 docker-compose down
+
+echo "Killing any remaining bot processes..."
+sudo pkill -f "python.*leader.py" || true
+sudo pkill -f "chromium" || true
+sudo pkill -f "chrome" || true
+
+echo "Waiting for processes to fully stop..."
+sleep 5
+
+echo "Starting services..."
 docker-compose up -d --build
-echo "Services restarted"
+
+echo "Restarting bot service..."
+sudo systemctl restart tagpro.service
+
+echo "All services restarted"
 EOF
 
 sudo chmod +x /usr/local/bin/tagpro-restart

@@ -60,7 +60,11 @@ jobs:
         
         # Health check
         echo "Performing health check..."
-        if curl -f http://localhost/ > /dev/null 2>&1; then
+        echo "Testing HTTP connection..."
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ || echo "000")
+        echo "HTTP Status: $HTTP_STATUS"
+        
+        if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "301" ] || [ "$HTTP_STATUS" = "302" ]; then
           echo "✅ Web services deployment successful! Health check passed."
           
           # Restart bot service to pick up new code
@@ -80,7 +84,14 @@ jobs:
             echo "Deployed commit: $NEW_HASH"
           fi
         else
-          echo "❌ Health check failed. Rolling back..."
+          echo "❌ Health check failed. HTTP Status: $HTTP_STATUS"
+          echo "Container status:"
+          docker-compose ps
+          echo "Nginx logs:"
+          docker-compose logs nginx --tail 20
+          echo "Web service logs:"
+          docker-compose logs web --tail 20
+          echo "Rolling back..."
           git reset --hard $OLD_HASH
           docker-compose down
           docker-compose up -d --build

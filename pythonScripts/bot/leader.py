@@ -309,7 +309,7 @@ class DriverAdapter:
 
 class TagproBot:
     URL = "https://tagpro.koalabeast.com/groups/"
-    room_name = "Tryhard Gravity Lobby2"
+    room_name = "Tryhard Gravity Lobby1"
     default_map_settings = {"category": None, "difficulty": (1.0, 3.5), "minfun": 3.0}
     default_lobby_settings = {"region": "US Central"}
     moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian", "3"]
@@ -503,21 +503,25 @@ class TagproBot:
             self.settings = dict(self.default_map_settings)
             event_logger.info("Empty lobby, reverting to default settings.")
             
-        # If game is active but no players are ready, wait a bit before ending
-        if self.game_is_active and self.num_ready_balls == 0:
-            # Give players time to join before ending the game
-            if not hasattr(self, 'empty_game_start_time'):
-                self.empty_game_start_time = time.time()
-                event_logger.info("Game has no ready players, starting empty game timer")
-            elif time.time() - self.empty_game_start_time > 60:  # Wait 1 minute
-                event_logger.info("Game has been empty for 1 minute, ending game")
-                self.game_is_active = False
-                self.adapter.send_chat_msg("Game ended due to no players. Please return to lobby.")
-                delattr(self, 'empty_game_start_time')
-        else:
-            # Reset the empty game timer if players are present
-            if hasattr(self, 'empty_game_start_time'):
-                delattr(self, 'empty_game_start_time')
+        # Auto-assign players to red team if they're in waiting/spectators and we have room
+        if self.num_ready_balls < 4:  # Only auto-assign if we have room
+            waiting_players = lobby_players.get("waiting", [])
+            spectator_players = lobby_players.get("spectators", [])
+            
+            for player in waiting_players + spectator_players:
+                if player.get("name") and player.get("name") != "Some Ball":
+                    # Try to find their ID from authed_members
+                    player_id = None
+                    for name, pid in self.authed_members.items():
+                        if name == player["name"]:
+                            player_id = pid
+                            break
+                    
+                    if player_id:
+                        # Move them to red team
+                        self.adapter.send_ws_message(["team", {"id": player_id, "team": 1}])
+                        event_logger.info(f"Auto-assigned {player['name']} to red team")
+                        break  # Only move one player at a time to avoid spam
 
     def handle_chat(self, event_details):
         msg = event_details.get("message", "")
@@ -529,8 +533,6 @@ class TagproBot:
         event_logger.info("Chat: " + str(event_details))
         if event_details.get("from") is None and "has joined the group" in msg:
             # determine if the player who joined is logged in
-
-
             time.sleep(1)
             self.adapter.send_chat_msg("Welcome!\nJoin the Good Team and click 'Join Game'")
         elif "message" in event_details:

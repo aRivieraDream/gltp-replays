@@ -218,3 +218,41 @@
 2025-08-25 14:16:25 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'Welcome!', 'to': 'group'}
 2025-08-25 14:16:25 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': "Drag yourself into Red & click 'Join Game'", 'to': 'group'}
 2025-08-25 14:16:25 - INFO - Set preset: gZMefExuggtaiaaaJraaksaaamaaaE
+2025-08-25 21:44:11 - INFO - (Red) Ready balls: 0
+2025-08-25 21:44:11 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': []}
+2025-08-25 21:44:11 - INFO - Game active: False, Ready players: 0
+2025-08-25 21:44:11 - INFO - Chat: {'auth': None, 'from': None, 'message': 'Some Ball has joined the group.', 'to': 'group'}
+2025-08-25 21:44:13 - INFO - Chat: {'color': '#E7E700', 'from': None, 'message': 'Now playing private games. Up to 20 players can enter your game, there is no limit on spectators!', 'to': 'group'}
+2025-08-25 21:44:13 - INFO - (Red) Ready balls: 0
+2025-08-25 21:44:13 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': [{'location': 'In Here · Leader', 'name': 'Some Ball'}]}
+2025-08-25 21:44:13 - INFO - Game active: False, Ready players: 0
+2025-08-25 21:44:13 - INFO - Empty lobby, reverting to default settings.
+2025-08-25 21:44:13 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': "Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': []}", 'to': 'group'}
+2025-08-25 21:44:13 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': "Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': []}", 'to': 'group'}
+2025-08-25 21:44:13 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': "Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': []}", 'to': 'group'}
+2025-08-25 21:44:13 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'Welcome!', 'to': 'group'}
+2025-08-25 21:44:13 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': "Join the Good Team and click 'Join Game'", 'to': 'group'}
+2025-08-25 21:44:14 - INFO - (Red) Ready balls: 0
+2025-08-25 21:44:14 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-08-25 21:44:14 - INFO - Game active: False, Ready players: 0
+2025-08-25 21:44:14 - INFO - Empty lobby, reverting to default settings.
+2025-08-25 21:44:22 - INFO - (Red) Ready balls: 0
+2025-08-25 21:44:22 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': [{'location': '???', 'name': 'Valerian'}]}
+2025-08-25 21:44:22 - INFO - Game active: False, Ready players: 0
+2025-08-25 21:44:22 - INFO - Chat: {'auth': True, 'from': None, 'message': 'Valerian has joined the group.', 'to': 'group'}
+2025-08-25 21:44:24 - INFO - (Red) Ready balls: 1
+2025-08-25 21:44:24 - INFO - Lobby Players: {'red-team': [{'location': '???', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-08-25 21:44:24 - INFO - Game active: False, Ready players: 1
+2025-08-25 21:44:24 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': 'Welcome!', 'to': 'group'}
+2025-08-25 21:44:24 - INFO - Chat: {'auth': None, 'from': 'Some Ball', 'isLeader': True, 'message': "Join the Good Team and click 'Join Game'", 'to': 'group'}
+2025-08-25 21:44:25 - INFO - (Red) Ready balls: 1
+2025-08-25 21:44:25 - INFO - Lobby Players: {'red-team': [{'location': 'In Here', 'name': 'Valerian'}], 'blue-team': [], 'spectators': [{'location': 'In Here · Leader', 'name': 'Some Ball'}], 'waiting': []}
+2025-08-25 21:44:25 - INFO - Game active: False, Ready players: 1
+2025-08-25 21:44:32 - INFO - Set preset: gZMefGlmggtuiaaaJyaraaksaaamaaaE
+2025-08-25 21:44:37 - INFO - Launched preset: gZMefGlmggtuiaaaJyaraaksaaamaaaE
+2025-08-25 21:44:37 - INFO - Waiting for game to load and players to join...
+2025-08-25 21:44:45 - INFO - (Red) Ready balls: 0
+2025-08-25 21:44:45 - INFO - Lobby Players: {'red-team': [], 'blue-team': [], 'spectators': [], 'waiting': []}
+2025-08-25 21:44:45 - INFO - Game active: False, Ready players: 0
+2025-08-25 21:44:45 - INFO - Game Running: gZMefGlmggtuiaaaJyaraaksaaamaaaE
+2025-08-25 21:44:46 - INFO - Game UUID: fc7c146a-fb42-4b9d-92cf-96b61371fbea
