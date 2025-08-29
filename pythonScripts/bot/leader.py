@@ -471,15 +471,6 @@ class TagproBot:
                 
             event_logger.info(f"Game Running: {self.current_game_preset}")
             
-            # Add a delay to let the joiner phase complete before ensuring group state
-            # This prevents the bot from immediately navigating back to group during game start
-            if not hasattr(self, 'game_start_time'):
-                self.game_start_time = time.time()
-                event_logger.info("Game started, waiting for joiner phase to complete...")
-                time.sleep(8)  # Wait 8 seconds for joiner phase
-                delattr(self, 'game_start_time')
-            
-            self.ensure_in_group(self.room_name)
             # Only set game as active if there are actually players ready
             if not self.game_is_active and self.num_ready_balls > 0:
                 self.game_is_active = True
@@ -488,6 +479,22 @@ class TagproBot:
                 # If game was active but no players are ready, keep it active for a bit
                 # This prevents immediate game ending when players are still joining
                 pass
+            
+            # Delay the ensure_in_group call to let joiner phase complete
+            # This prevents the bot from immediately leaving the game during startup
+            if not hasattr(self, 'delayed_group_check'):
+                self.delayed_group_check = time.time()
+                event_logger.info("Game started, will check group state after joiner phase...")
+                # Schedule the group check for later instead of doing it immediately
+                import threading
+                def delayed_group_check():
+                    time.sleep(15)  # Wait 15 seconds for joiner phase
+                    event_logger.info("Joiner phase should be complete, checking group state...")
+                    self.ensure_in_group(self.room_name)
+                    if hasattr(self, 'delayed_group_check'):
+                        delattr(self, 'delayed_group_check')
+                
+                threading.Thread(target=delayed_group_check, daemon=True).start()
 
     def handle_member(self, event_details):
         if event_details.get("auth") and event_details.get("name"):
