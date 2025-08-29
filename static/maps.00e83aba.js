@@ -209,7 +209,9 @@ export class MapsTable {
         this.allRecords = records; // Always keep the full list up to date
         this.recordsArray = records;
         this.mapsTableBody.innerHTML = "";
-        records.forEach(record => this.renderRow(record));
+        records.forEach((record, index) => {
+            this.renderRow(record);
+        }, this);
     }
 
     renderRow(record) {
@@ -318,6 +320,16 @@ export class MapsTable {
         });
         leftDetailDiv.appendChild(launchButton);
 
+        // Create map preview placeholder if we have a map_id
+        if (record.map_id) {
+            const mapPreview = document.createElement('div');
+            mapPreview.className = 'map-preview';
+            mapPreview.innerHTML = '<div class="loading-spinner">Click to load preview</div>';
+            
+            // Insert the preview placeholder into the left detail section
+            leftDetailDiv.appendChild(mapPreview);
+        }
+
         // Create medal panel
         const medalPanelDiv = document.createElement('div');
         medalPanelDiv.className = "medal-panel";
@@ -362,8 +374,38 @@ export class MapsTable {
         detailDiv.appendChild(detailWrapper);
 
         // Add click handler for map name
+        const mapsTableInstance = this; // Capture MapsTable instance reference
         mapNameCell.addEventListener('click', function () {
-            detailDiv.style.display = detailDiv.style.display === "none" ? "block" : "none";
+            const isExpanding = detailDiv.style.display === "none";
+            detailDiv.style.display = isExpanding ? "block" : "none";
+            
+            // Load map preview when expanding
+            if (isExpanding && record.map_id) {
+                const mapPreview = leftDetailDiv.querySelector('.map-preview');
+                if (mapPreview && mapPreview.querySelector('.loading-spinner')) {
+                    mapPreview.innerHTML = '<div class="loading-spinner">Loading...</div>';
+                    
+                    const img = document.createElement('img');
+                    const imageUrl = `https://fortunatemaps.herokuapp.com/preview/${record.map_id}`;
+                    img.src = imageUrl;
+                    img.alt = `Preview of ${record.map_name}`;
+                    img.style.cursor = 'pointer';
+                    
+                    img.onload = function() {
+                        mapPreview.innerHTML = '';
+                        mapPreview.appendChild(img);
+                    };
+                    
+                    img.onerror = function() {
+                        mapPreview.innerHTML = '<div class="error">Preview failed</div>';
+                    };
+                    
+                    // Add click handler for large preview
+                    img.onclick = function() {
+                        mapsTableInstance.showLargePreview(record.map_name, imageUrl);
+                    };
+                }
+            }
         });
         mapNameCell.appendChild(detailDiv);
         tr.appendChild(mapNameCell);
@@ -407,5 +449,101 @@ export class MapsTable {
         tr.appendChild(ballsReqCell);
 
         this.mapsTableBody.appendChild(tr);
+    }
+
+    showLargePreview(mapName, imageSrc) {
+        // Create modal for large preview
+        const modal = document.createElement('div');
+        modal.className = 'preview-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+        `;
+
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        `;
+
+        const img = document.createElement('img');
+        img.src = imageSrc;
+        img.alt = `Large preview of ${mapName}`;
+        img.style.cssText = `
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        `;
+
+        const closeButton = document.createElement('div');
+        closeButton.innerHTML = '×';
+        closeButton.style.cssText = `
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        `;
+
+        const mapNameLabel = document.createElement('div');
+        mapNameLabel.textContent = mapName;
+        mapNameLabel.style.cssText = `
+            position: absolute;
+            top: -40px;
+            left: 0;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 8px 12px;
+            border-radius: 4px;
+        `;
+
+        modalContent.appendChild(img);
+        modalContent.appendChild(closeButton);
+        modalContent.appendChild(mapNameLabel);
+        modal.appendChild(modalContent);
+
+        // Close modal on click
+        const closeModal = () => {
+            document.body.removeChild(modal);
+        };
+
+        modal.addEventListener('click', closeModal);
+        closeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeModal();
+        });
+
+        // Close on Escape key
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        document.body.appendChild(modal);
     }
 }

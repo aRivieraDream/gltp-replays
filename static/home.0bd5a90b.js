@@ -1,5 +1,5 @@
 import { dataUrl, setupNavigation } from './shared.97137a2a.js';
-import { MapsTable } from './maps.00e83aba.js';
+import { MapsTable } from './maps.00e83aba.js?v=20241220';
 import { Leaderboard, processLeaderboardData } from './leaderboard.a6bf37e4.js';
 
 // Load presets
@@ -26,10 +26,16 @@ fetch(dataUrl)
     } = processLeaderboardData(data);
 
     // Initialize and render maps table
+    console.log('🔧 Creating MapsTable...');
     const mapsTable = new MapsTable(presets, recordsByMap, mapMetadata);
+    console.log('🔧 MapsTable created, recordsByMap:', recordsByMap);
+    console.log('🔧 bestRecords:', bestRecords);
+    
     const recordsArray = Object.values(bestRecords);
     recordsArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    console.log('🔧 Calling mapsTable.render with', recordsArray.length, 'records');
     mapsTable.render(recordsArray);
+    console.log('🔧 render() completed');
 
     // Initialize and render leaderboards
     const leaderboard = new Leaderboard();
