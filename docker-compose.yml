@@ -8,11 +8,11 @@ services:
       dockerfile: Dockerfile.web
     container_name: tagpro-web
     ports:
-      - "8000"
+      - "8000:8000"
     volumes:
       - ./data:/app/data
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/ssl:/etc/ssl/certs
       - ./nginx/www:/var/www/html
       - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: always
