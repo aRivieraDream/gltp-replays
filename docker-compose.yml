@@ -49,13 +49,11 @@ services:
       - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/nginx/ssl
+      - /etc/ssl/gltp:/etc/ssl/certs  # This maps to where nginx looks for certs
       - ./nginx/www:/var/www/html
     depends_on:
       - web
     restart: always
-    networks:
-      - app-network
 
 networks:
   app-network:
