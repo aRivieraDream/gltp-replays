@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile.web
     container_name: tagpro-web
-    expose:
+    ports:
       - "8000"
     volumes:
       - ./data:/app/data
