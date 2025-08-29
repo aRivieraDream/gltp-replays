@@ -309,7 +309,7 @@ class DriverAdapter:
 
 class TagproBot:
     URL = "https://tagpro.koalabeast.com/groups/"
-    room_name = "Tryhard Gravity Lobby Test"
+    room_name = "Tryhard Gravity Lobby"
     default_map_settings = {"category": None, "difficulty": (1.0, 3.5), "minfun": 3.0}
     default_lobby_settings = {"region": "US Central"}
     moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian", "3"]
@@ -331,6 +331,7 @@ class TagproBot:
         self.current_game_preset = None
         self.current_game_uuid = None
         self.game_is_active = False
+        self.game_id_pending = False  # Track if we're waiting for game ID
         ###
 
         self.adapter.event_handlers["ws_chat"] = self.handle_chat
@@ -384,6 +385,11 @@ class TagproBot:
     def ensure_in_group(self, room_name):
         """Ensures the browser is in the desired group by room name."""
         current_url = self.adapter.driver.current_url
+
+        # If game ID is pending, don't navigate away from game page
+        if self.game_id_pending and current_url == "https://tagpro.koalabeast.com/game":
+            event_logger.info("Game ID pending, staying in game during joiner phase")
+            return
 
         if current_url == "https://tagpro.koalabeast.com/games/find":
             if self.finding_game_start_time is None:
@@ -449,9 +455,13 @@ class TagproBot:
 
     def handle_game(self, event_details):
         if event_details.get("gameId") is None:
-            # Don't immediately end the game - give it time to load
-            if self.game_is_active:
-                # Start a timer for ending the game
+            # Game ID is None - this could be game starting or ending
+            if self.game_id_pending:
+                # We're waiting for game ID, this is normal startup
+                event_logger.info("Game starting, waiting for game ID...")
+                return
+            elif self.game_is_active:
+                # Game was active but now has no ID, start end timer
                 if not hasattr(self, 'game_end_timer_start'):
                     self.game_end_timer_start = time.time()
                     event_logger.info("GameId is None, starting end game timer")
@@ -459,15 +469,21 @@ class TagproBot:
                     # Game has been without gameId for 10 seconds, end it
                     event_logger.info(f"End of game: {self.current_game_preset}")
                     self.game_is_active = False
+                    self.game_id_pending = False
                     self.adapter.send_chat_msg("GG. Loading next map. Please return to lobby.")
                     delattr(self, 'game_end_timer_start')
             else:
                 # Game wasn't active, so this is just normal loading
                 pass
         else:
-            # Game has a gameId, reset the end timer and ensure game is active
+            # Game has a gameId - game is now fully started
             if hasattr(self, 'game_end_timer_start'):
                 delattr(self, 'game_end_timer_start')
+            
+            # Clear pending state since we now have a game ID
+            if self.game_id_pending:
+                self.game_id_pending = False
+                event_logger.info(f"Game ID received: {event_details.get('gameId')}, joiner phase complete")
                 
             event_logger.info(f"Game Running: {self.current_game_preset}")
             
@@ -479,22 +495,6 @@ class TagproBot:
                 # If game was active but no players are ready, keep it active for a bit
                 # This prevents immediate game ending when players are still joining
                 pass
-            
-            # Delay the ensure_in_group call to let joiner phase complete
-            # This prevents the bot from immediately leaving the game during startup
-            if not hasattr(self, 'delayed_group_check'):
-                self.delayed_group_check = time.time()
-                event_logger.info("Game started, will check group state after joiner phase...")
-                # Schedule the group check for later instead of doing it immediately
-                import threading
-                def delayed_group_check():
-                    time.sleep(15)  # Wait 15 seconds for joiner phase
-                    event_logger.info("Joiner phase should be complete, checking group state...")
-                    self.ensure_in_group(self.room_name)
-                    if hasattr(self, 'delayed_group_check'):
-                        delattr(self, 'delayed_group_check')
-                
-                threading.Thread(target=delayed_group_check, daemon=True).start()
 
     def handle_member(self, event_details):
         if event_details.get("auth") and event_details.get("name"):
@@ -517,6 +517,7 @@ class TagproBot:
         # reset to default if no users
         if self.num_in_lobby == 1:
             self.settings = dict(self.default_map_settings)
+            self.game_id_pending = False  # Reset pending state if lobby is empty
             event_logger.info("Empty lobby, reverting to default settings.")
             
         # Auto-assign players to red team if they're in waiting/spectators and we have room
@@ -583,6 +584,7 @@ class TagproBot:
                         self.adapter.send_chat_msg("Ending current game...")
                         time.sleep(2)
                         self.adapter.send_ws_message(["endGame"])
+                        self.game_id_pending = False  # Reset pending state when manually ending game
                         self.load_preset(preset)
                         time.sleep(2)
                         self.maybe_launch()
@@ -662,9 +664,10 @@ class TagproBot:
             return False
         self.current_game_preset = self.current_preset
         self.current_preset = None
+        self.game_id_pending = True  # Set pending state before launching
         self.adapter.send_ws_message(["groupPlay"])
         event_logger.info(f"Launched preset: {self.current_game_preset}")
-        event_logger.info("Waiting for game to load and players to join...")
+        event_logger.info("Game ID pending - bot will stay in game during joiner phase")
         time.sleep(5)
         return True
 
