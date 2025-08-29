@@ -12,7 +12,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/ssl:/etc/ssl/certs
+      - /etc/ssl/gltp:/etc/ssl/certs
       - ./nginx/www:/var/www/html
       - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: always
