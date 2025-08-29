@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maps & Leaderboard (BETA) - MAP PREVIEWS ENABLED!</title>
+  <title>Maps & Leaderboard (BETA)</title>
   <link rel="stylesheet" href="/static/style.89a2bd73.css">
   <link rel="stylesheet" href="/static/css/replay.626d28e8.css">
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -22,7 +22,16 @@
       <a id="leaderboardLink">Leaderboard</a>
       <a id="gltpLink">GLTP</a>
     </div>
-    <div style="color: #1e90ff; font-weight: bold; margin-left: 20px;">🚀 MAP PREVIEWS ARE NOW ENABLED! 🚀</div>
+
+  </div>
+
+  <!-- Update banner -->
+  <div class="update-banner">
+    <div class="update-content">
+      <span class="update-icon">🆕</span>
+      <span class="update-text">Map previews are now available! Click on any map name to expand and see the preview image.</span>
+      <button class="update-dismiss" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+    </div>
   </div>
 
   <!-- Container for side-by-side layout -->

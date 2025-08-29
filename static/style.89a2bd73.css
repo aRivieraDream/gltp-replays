@@ -21,6 +21,70 @@ body {
   z-index: 100;
 }
 
+/* Update banner */
+.update-banner {
+  background: linear-gradient(135deg, #1e90ff, #0078d7);
+  color: white;
+  padding: 12px 20px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(30, 144, 255, 0.3);
+}
+
+.update-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.update-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.update-text {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.update-dismiss {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.update-dismiss:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive banner */
+@media (max-width: 768px) {
+  .update-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .update-text {
+    font-size: 13px;
+    text-align: center;
+  }
+}
+
 .nav {
   display: flex;
   gap: 20px;
