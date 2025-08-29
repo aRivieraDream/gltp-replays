@@ -455,69 +455,21 @@ export class MapsTable {
         // Create modal for large preview
         const modal = document.createElement('div');
         modal.className = 'preview-modal';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            cursor: pointer;
-        `;
 
         const modalContent = document.createElement('div');
-        modalContent.style.cssText = `
-            max-width: 90%;
-            max-height: 90%;
-            position: relative;
-        `;
+        modalContent.className = 'modal-content';
 
         const img = document.createElement('img');
         img.src = imageSrc;
         img.alt = `Large preview of ${mapName}`;
-        img.style.cssText = `
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        `;
 
         const closeButton = document.createElement('div');
         closeButton.innerHTML = '×';
-        closeButton.style.cssText = `
-            position: absolute;
-            top: -40px;
-            right: 0;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            background-color: rgba(0, 0, 0, 0.5);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        `;
+        closeButton.className = 'close-button';
 
         const mapNameLabel = document.createElement('div');
         mapNameLabel.textContent = mapName;
-        mapNameLabel.style.cssText = `
-            position: absolute;
-            top: -40px;
-            left: 0;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 8px 12px;
-            border-radius: 4px;
-        `;
+        mapNameLabel.className = 'map-name-label';
 
         modalContent.appendChild(img);
         modalContent.appendChild(closeButton);
