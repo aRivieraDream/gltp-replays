@@ -23,13 +23,17 @@ jobs:
         # Add VM to known hosts
         ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
         
+        # Test SSH connection first
+        echo "Testing SSH connection..."
+        ssh -o ConnectTimeout=10 -o BatchMode=yes ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} "echo 'SSH connection successful'"
+        
         # Execute deployment commands on VM
-        ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
+        ssh -o ConnectTimeout=30 ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
           set -e
           echo "Starting deployment..."
           
-                  # Navigate to project directory
-        cd /home/${{ secrets.VM_USER }}/gltp-replays
+          # Navigate to project directory
+          cd /home/${{ secrets.VM_USER }}/gltp-replays
           
           # Get current commit hash
           OLD_HASH=$(git rev-parse HEAD)
@@ -50,57 +54,57 @@ jobs:
           echo "Stopping containers..."
           docker-compose down
           
-                  # Build and start new containers
-        echo "Building and starting new containers..."
-        docker-compose up -d --build
-        
-        # Wait for services to be ready
-        echo "Waiting for services to be ready..."
-        sleep 15
-        
-        # Health check
-        echo "Performing health check..."
-        echo "Testing HTTP connection..."
-        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ || echo "000")
-        echo "HTTP Status: $HTTP_STATUS"
-        
-        if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "301" ] || [ "$HTTP_STATUS" = "302" ]; then
-          echo "✅ Web services deployment successful! Health check passed."
-          
-          # Restart bot service to pick up new code
-          echo "Restarting bot service..."
-          sudo systemctl restart tagpro.service
-          
-          # Wait for bot to be ready
-          echo "Waiting for bot service to be ready..."
-          sleep 10
-          
-          # Check bot service status
-          if sudo systemctl is-active --quiet tagpro.service; then
-            echo "✅ Bot service restarted successfully"
-            echo "Deployed commit: $NEW_HASH"
-          else
-            echo "⚠️ Bot service restart failed, but web services are working"
-            echo "Deployed commit: $NEW_HASH"
-          fi
-        else
-          echo "❌ Health check failed. HTTP Status: $HTTP_STATUS"
-          echo "Container status:"
-          docker-compose ps
-          echo "Nginx logs:"
-          docker-compose logs nginx --tail 20
-          echo "Web service logs:"
-          docker-compose logs web --tail 20
-          echo "Rolling back..."
-          git reset --hard $OLD_HASH
-          docker-compose down
+          # Build and start new containers
+          echo "Building and starting new containers..."
           docker-compose up -d --build
           
-          # Also restart bot service after rollback
-          echo "Restarting bot service after rollback..."
-          sudo systemctl restart tagpro.service
-          exit 1
-        fi
+          # Wait for services to be ready
+          echo "Waiting for services to be ready..."
+          sleep 15
+          
+          # Health check
+          echo "Performing health check..."
+          echo "Testing HTTP connection..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/ || echo "000")
+          echo "HTTP Status: $HTTP_STATUS"
+          
+          if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "301" ] || [ "$HTTP_STATUS" = "302" ]; then
+            echo "✅ Web services deployment successful! Health check passed."
+            
+            # Restart bot service to pick up new code
+            echo "Restarting bot service..."
+            sudo systemctl restart tagpro.service
+            
+            # Wait for bot to be ready
+            echo "Waiting for bot service to be ready..."
+            sleep 10
+            
+            # Check bot service status
+            if sudo systemctl is-active --quiet tagpro.service; then
+              echo "✅ Bot service restarted successfully"
+              echo "Deployed commit: $NEW_HASH"
+            else
+              echo "⚠️ Bot service restart failed, but web services are working"
+              echo "Deployed commit: $NEW_HASH"
+            fi
+          else
+            echo "❌ Health check failed. HTTP Status: $HTTP_STATUS"
+            echo "Container status:"
+            docker-compose ps
+            echo "Nginx logs:"
+            docker-compose logs nginx --tail 20
+            echo "Web service logs:"
+            docker-compose logs web --tail 20
+            echo "Rolling back..."
+            git reset --hard $OLD_HASH
+            docker-compose down
+            docker-compose up -d --build
+            
+            # Also restart bot service after rollback
+            echo "Restarting bot service after rollback..."
+            sudo systemctl restart tagpro.service
+            exit 1
+          fi
         EOF
         
     - name: Deployment Status
