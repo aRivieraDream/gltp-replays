@@ -9,7 +9,7 @@ async def get_spreadsheet_maps():
         "id": "1OnuTCekHKCD91W39jXBG4uveTCCyMxf9Ofead43MMCU",
         "gid": "1775606307",
     }
-    async with httpx.AsyncClient(follow_redirects=True) as client:
+    async with httpx.AsyncClient(follow_redirects=True, timeout=10.0) as client:
         resp = await client.get(url, params=params, )
         resp.raise_for_status()
         text = resp.text
