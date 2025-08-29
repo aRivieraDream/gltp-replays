@@ -54,6 +54,8 @@ services:
     depends_on:
       - web
     restart: always
+    networks:
+      - app-network
 
 networks:
   app-network:
