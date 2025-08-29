@@ -29,8 +29,15 @@ UNPROCESSED_FILE = DATA_DIR / "unprocessed_replays.json"
 
 @app.on_event("startup")
 async def startup():
-    app.state.maps = await get_spreadsheet_maps()
-
+    # Try to get maps during startup, but don't fail if it times out
+    try:
+        app.state.maps = await get_spreadsheet_maps()
+        print("Successfully loaded maps during startup")
+    except Exception as e:
+        print(f"Warning: Failed to load maps during startup: {e}")
+        print("Application will start with empty maps and retry later")
+        app.state.maps = []
+    
     DATA_DIR.mkdir(exist_ok=True)
     REPLAYS_DIR.mkdir(exist_ok=True)
     for path, init in [(STATS_FILE, {}), (URIS_FILE, []), (UNPROCESSED_FILE, {})]:
@@ -45,13 +52,31 @@ async def sync_replays():
 
 @repeat_every(seconds=6 * 3600, wait_first=True)
 async def refresh_maps():
-    maps = await get_spreadsheet_maps()
-    app.state.maps = maps
+    try:
+        maps = await get_spreadsheet_maps()
+        app.state.maps = maps
+        print(f"Successfully refreshed maps, loaded {len(maps)} maps")
+    except Exception as e:
+        print(f"Error refreshing maps: {e}")
+        # Keep existing maps if refresh fails
+        if not hasattr(app.state, 'maps') or not app.state.maps:
+            print("No existing maps available, setting empty list")
+            app.state.maps = []
 
 
 @app.get("/")
 async def serve_index():
     return FileResponse(Path(__file__).parent / "static" / "index.html")
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint to verify application status"""
+    return {
+        "status": "healthy",
+        "maps_loaded": len(app.state.maps) if hasattr(app.state, 'maps') else 0,
+        "timestamp": time.time()
+    }
 
 
 @app.post("/webhook")

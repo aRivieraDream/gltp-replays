@@ -9,10 +9,23 @@ async def get_spreadsheet_maps():
         "id": "1OnuTCekHKCD91W39jXBG4uveTCCyMxf9Ofead43MMCU",
         "gid": "1775606307",
     }
-    async with httpx.AsyncClient(follow_redirects=True, timeout=10.0) as client:
-        resp = await client.get(url, params=params, )
-        resp.raise_for_status()
-        text = resp.text
+    
+    # Increase timeout and add better error handling
+    timeout = httpx.Timeout(30.0, connect=10.0)
+    async with httpx.AsyncClient(follow_redirects=True, timeout=timeout) as client:
+        try:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            text = resp.text
+        except httpx.TimeoutException as e:
+            print(f"Timeout error fetching spreadsheet: {e}")
+            raise
+        except httpx.HTTPStatusError as e:
+            print(f"HTTP error fetching spreadsheet: {e.response.status_code}")
+            raise
+        except Exception as e:
+            print(f"Unexpected error fetching spreadsheet: {e}")
+            raise
 
     csvfile = io.StringIO(text, newline="")
     map_data = [

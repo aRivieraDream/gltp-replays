@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Web service - serves the leaderboard website and handles webhooks
   web:
