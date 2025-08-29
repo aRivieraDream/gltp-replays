@@ -470,6 +470,15 @@ class TagproBot:
                 delattr(self, 'game_end_timer_start')
                 
             event_logger.info(f"Game Running: {self.current_game_preset}")
+            
+            # Add a delay to let the joiner phase complete before ensuring group state
+            # This prevents the bot from immediately navigating back to group during game start
+            if not hasattr(self, 'game_start_time'):
+                self.game_start_time = time.time()
+                event_logger.info("Game started, waiting for joiner phase to complete...")
+                time.sleep(8)  # Wait 8 seconds for joiner phase
+                delattr(self, 'game_start_time')
+            
             self.ensure_in_group(self.room_name)
             # Only set game as active if there are actually players ready
             if not self.game_is_active and self.num_ready_balls > 0:
