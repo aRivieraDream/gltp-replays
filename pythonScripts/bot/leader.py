@@ -309,7 +309,7 @@ class DriverAdapter:
 
 class TagproBot:
     URL = "https://tagpro.koalabeast.com/groups/"
-    room_name = "Tryhard Gravity Lobby"
+    room_name = "Tryhard Gravity Lobby Test"
     default_map_settings = {"category": None, "difficulty": (1.0, 3.5), "minfun": 3.0}
     default_lobby_settings = {"region": "US Central"}
     moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian", "3"]
