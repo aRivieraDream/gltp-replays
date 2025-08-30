@@ -309,7 +309,7 @@ class DriverAdapter:
 
 class TagproBot:
     URL = "https://tagpro.koalabeast.com/groups/"
-    room_name = "Tryhard Gravity Lobby"
+    room_name = "Tryhard Grav (No SomeBalls)"
     default_map_settings = {"category": None, "difficulty": (1.0, 3.5), "minfun": 3.0}
     default_lobby_settings = {"region": "US Central"}
     moderator_names = ["FWO", "DAD.", "TeaForYou&Me", "Some Ball 64", "MRCOW", "Billy", "hmmmm", "Valerian", "3"]
@@ -520,25 +520,7 @@ class TagproBot:
             self.game_id_pending = False  # Reset pending state if lobby is empty
             event_logger.info("Empty lobby, reverting to default settings.")
             
-        # Auto-assign players to red team if they're in waiting/spectators and we have room
-        if self.num_ready_balls < 4:  # Only auto-assign if we have room
-            waiting_players = lobby_players.get("waiting", [])
-            spectator_players = lobby_players.get("spectators", [])
-            
-            for player in waiting_players + spectator_players:
-                if player.get("name") and player.get("name") != "Some Ball":
-                    # Try to find their ID from authed_members
-                    player_id = None
-                    for name, pid in self.authed_members.items():
-                        if name == player["name"]:
-                            player_id = pid
-                            break
-                    
-                    if player_id:
-                        # Move them to red team
-                        self.adapter.send_ws_message(["team", {"id": player_id, "team": 1}])
-                        event_logger.info(f"Auto-assigned {player['name']} to red team")
-                        break  # Only move one player at a time to avoid spam
+        
 
     def handle_chat(self, event_details):
         msg = event_details.get("message", "")
@@ -700,7 +682,6 @@ class TagproBot:
         while True:
             time.sleep(1)
 
-            self.ensure_in_group(self.room_name)
             self.adapter.process_ws_events()
 
             if launched_new:
@@ -721,6 +702,7 @@ class TagproBot:
                 launched_new = self.maybe_launch()
 
             i += 1
+            self.ensure_in_group(self.room_name)
 
 
 if __name__ == '__main__':
