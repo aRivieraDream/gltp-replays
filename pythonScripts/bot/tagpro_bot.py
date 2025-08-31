@@ -228,6 +228,8 @@ class TagproBot:
         self.adapter.send_ws_message(["groupPresetApply", preset])
         self.current_preset = preset
         event_logger.info(f"Set preset: {preset}")
+        # Give the preset time to apply
+        time.sleep(2)
 
     def run(self):
         """Main bot loop."""
@@ -254,8 +256,11 @@ class TagproBot:
 
             # Load random preset and maybe launch
             if i % PRESET_LOAD_INTERVAL == 0 and not self.adapter.is_game_active() and self.num_in_lobby != 1:
+                event_logger.info(f"Attempting to load preset and launch: i={i}, is_game_active={self.adapter.is_game_active()}, num_in_lobby={self.num_in_lobby}")
                 self.load_random_preset()
+                # Give time for preset to load before trying to launch
                 time.sleep(LAUNCH_DELAY)
+                # Try to launch if conditions are met
                 launched_new = self.maybe_launch()
 
             i += 1
