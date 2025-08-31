@@ -3,9 +3,9 @@
 - 2) `pip install selenium requests rapidfuzz`
 
 # Run
-In the directory with `leader.py` and `maps.py`:
+In the directory with the bot files:
 
-`python3 leader.py` 
+`python3 main.py` 
 
 # VM Setup
 ### Instance:
@@ -29,4 +29,4 @@ The code --> `git clone https://github.com/BambiTP/GLTP.git`
 
 ### Run the Bot
 `tmux`
-`python3 leader.py`
+`python3 main.py`

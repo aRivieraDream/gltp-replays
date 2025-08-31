@@ -35,4 +35,4 @@ RUN mkdir -p data
 ENV DISPLAY=:99
 
 # Run the bot
-CMD ["python", "/app/bot/leader.py"]
+CMD ["python", "/app/bot/main.py"]

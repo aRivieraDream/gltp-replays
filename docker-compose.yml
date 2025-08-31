@@ -34,7 +34,7 @@ services:
     environment:
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
-    command: python /app/bot/leader.py
+    command: python /app/bot/main.py
     networks:
       - app-network
 

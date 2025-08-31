@@ -145,7 +145,7 @@ echo "Stopping all services..."
 docker-compose down
 
 echo "Killing any remaining bot processes..."
-sudo pkill -f "python.*leader.py" || true
+sudo pkill -f "python.*main.py" || true
 sudo pkill -f "chromium" || true
 sudo pkill -f "chrome" || true
 

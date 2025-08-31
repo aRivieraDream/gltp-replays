@@ -158,7 +158,7 @@ docker-compose exec bot python -c "import discord; print('Bot dependencies OK')"
 
 ### Adding New Features
 1. **Web Service**: Add endpoints to `main.py`
-2. **Bot Service**: Modify `pythonScripts/bot/leader.py`
+2. **Bot Service**: Modify `pythonScripts/bot/main.py` (or individual component files like `tagpro_bot.py`, `chat_handler.py`, etc.)
 3. **Shared Logic**: Place in root-level Python files (e.g., `maps.py`, `jsonutil.py`)
 
 ### Testing Changes

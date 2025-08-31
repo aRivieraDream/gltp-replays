@@ -7,7 +7,7 @@ Type=simple
 User=pierce
 WorkingDirectory=/Users/pierce/Projects/service/pythonScripts/bot
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/usr/local/bin/python3 leader.py
+ExecStart=/usr/local/bin/python3 main.py
 Restart=always
 RestartSec=10
 
