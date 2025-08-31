@@ -3,6 +3,7 @@ import time
 import logging
 import json
 import random
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import JavascriptException
@@ -318,7 +319,7 @@ class TagproBot:
 
     def __init__(self, adapter: DriverAdapter):
         self.adapter = adapter
-        self.settings = dict(self.default_map_settings)
+        self.settings = self.load_saved_settings()
         self.lobby_settings = dict(self.default_lobby_settings)
 
         self.authed_members = {}
@@ -340,6 +341,29 @@ class TagproBot:
         self.adapter.event_handlers["ws_game"] = self.handle_game
 
         self.disallow_someballs = False
+
+    def save_settings(self):
+        """Save current settings to a file."""
+        try:
+            with open('bot_settings.json', 'w') as f:
+                json.dump(self.settings, f, indent=2)
+            event_logger.info(f"Settings saved: {self.settings}")
+        except Exception as e:
+            event_logger.error(f"Failed to save settings: {e}")
+
+    def load_saved_settings(self):
+        """Load settings from file, fall back to defaults if file doesn't exist."""
+        try:
+            if os.path.exists('bot_settings.json'):
+                with open('bot_settings.json', 'r') as f:
+                    saved_settings = json.load(f)
+                event_logger.info(f"Loaded saved settings: {saved_settings}")
+                return saved_settings
+        except Exception as e:
+            event_logger.error(f"Failed to load saved settings: {e}")
+        
+        event_logger.info("Using default settings")
+        return dict(self.default_map_settings)
 
     @property
     def game_str(self):
@@ -514,11 +538,11 @@ class TagproBot:
         event_logger.info(f"Lobby Players: {lobby_players}")
         event_logger.info(f"Game active: {self.game_is_active}, Ready players: {self.num_ready_balls}")
 
-        # reset to default if no users
+        # Only reset to default if no users AND we haven't set custom settings
         if self.num_in_lobby == 1:
-            self.settings = dict(self.default_map_settings)
+            # Preserve custom settings - don't reset them when lobby becomes empty
+            event_logger.info("Empty lobby, preserving current settings.")
             self.game_id_pending = False  # Reset pending state if lobby is empty
-            event_logger.info("Empty lobby, reverting to default settings.")
             
         
 
@@ -544,8 +568,11 @@ class TagproBot:
             if msg.strip() == "HELP":
                 self.adapter.send_chat_msg(
                     "Commands: HELP, SETTINGS, MAP, INFO <query>, LAUNCHNEW <preset> (<map_id>), "
-                    "REGION east/central/west/eu/oce"
+                    "REGION east/central/west/eu/oce, SAVE"
                 )
+            elif msg.strip() == "SAVE":
+                self.save_settings()
+                self.adapter.send_chat_msg("Settings saved!")
             elif msg.strip() == "PLAY":
                 self.adapter.send_ws_message(["team", {"id": self.adapter.my_id, "team": 3}])
             elif msg.strip() == "ALLOW SOMEBALLS":
@@ -611,11 +638,13 @@ class TagproBot:
         if msg.strip() == "SETTINGS":
             self.adapter.send_chat_msg("Current settings: " + str(self.settings))
             self.adapter.send_chat_msg("Update settings via SETTINGS <key> <value>")
+            self.adapter.send_chat_msg("Valid keys: " + ", ".join(self.settings.keys()))
         elif msg.strip().lower() == "SETTINGS DEFAULT".lower():
             self.settings = dict(self.default_map_settings)
+            self.save_settings()  # Save the reset to defaults
             self.adapter.send_chat_msg("Default settings applied")
         elif len(parts) not in (3, 4) or parts[1].lower() not in self.settings:
-            self.adapter.send_chat_msg("Invalid command")
+            self.adapter.send_chat_msg("Invalid command. Valid keys: " + ", ".join(self.settings.keys()))
         else:
             key = parts[1]
             value = parts[2] if len(parts) == 3 else parts[2:]
@@ -634,15 +663,13 @@ class TagproBot:
                 self.adapter.send_chat_msg(f"No maps legal with settings: {new_settings}")
             else:
                 self.settings = new_settings
+                self.save_settings()  # Save settings when they're updated
                 self.adapter.send_chat_msg(f"Updated settings to: {self.settings}")
                 self.adapter.send_chat_msg(f"{len(legal_maps)} legal maps with these settings")
 
     def maybe_launch(self):
         if self.adapter.is_game_active() or not self.num_ready_balls or self.current_preset is None:
-            # When game is inactive, reset all settings
-            self.settings = dict(self.default_map_settings)
-            self.lobby_settings = dict(self.default_lobby_settings)
-            
+            # Don't reset settings when game is inactive - preserve user preferences
             return False
         self.current_game_preset = self.current_preset
         self.current_preset = None
@@ -667,7 +694,18 @@ class TagproBot:
     def load_random_preset(self):
         maps = self.get_legal_maps(get_maps(), self.settings)
         if not maps:
+            # Only reset to defaults if we have custom settings that are causing no maps to be found
+            if self.settings != self.default_map_settings:
+                event_logger.info("No maps found with current settings, temporarily using defaults")
+                temp_settings = dict(self.default_map_settings)
+                maps = self.get_legal_maps(get_maps(), temp_settings)
+                if maps:
+                    # Use default settings temporarily but don't overwrite user settings
+                    self.load_preset(random.choice([m["preset"] for m in maps]))
+                    return
+            # If still no maps, fall back to defaults
             self.settings = dict(self.default_map_settings)
+            self.save_settings()  # Save the fallback to defaults
             maps = self.get_legal_maps(get_maps(), self.settings)
         self.load_preset(random.choice([m["preset"] for m in maps]))
 
@@ -685,6 +723,7 @@ class TagproBot:
             self.adapter.process_ws_events()
 
             if launched_new:
+                print("LAUNCHED NEW")
                 time.sleep(10)
                 try:
                     self.adapter.send_chat_msg(self.game_str)
