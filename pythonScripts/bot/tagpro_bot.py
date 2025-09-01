@@ -286,9 +286,14 @@ class TagproBot:
         def _normalize(snapshot):
             normalized = {}
             for team_name, players in (snapshot or {}).items():
-                normalized[team_name] = sorted(
-                    [(p.get("name", ""), p.get("location", "")) for p in players]
-                )
+                player_tuples = []
+                for p in players:
+                    if isinstance(p, dict):
+                        player_tuples.append((p.get("name", ""), p.get("location", "")))
+                    else:
+                        # Handle case where player is a string or other type
+                        player_tuples.append((str(p), ""))
+                normalized[team_name] = sorted(player_tuples)
             return normalized
 
         current_norm = _normalize(lobby_players_current)
