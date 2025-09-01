@@ -152,13 +152,41 @@ class DriverAdapter:
                     elif event_key == "ws_you":
                         self.my_id = event_details
 
+    def get_ws_ids(self):
+        """Return list of injected WebSocket IDs if available."""
+        try:
+            return self.driver.execute_script("return Object.keys(window.myWebSockets || {});")
+        except Exception:
+            return []
+
+    def get_ws_debug_info(self):
+        """Return debugging info about WebSocket availability and page context."""
+        current_url = self.driver.current_url
+        ws_ids = self.get_ws_ids()
+        last_ready_state = None
+        if ws_ids:
+            try:
+                last_ready_state = self.driver.execute_script(
+                    "var ws = window.myWebSockets[arguments[0]]; return ws ? ws.readyState : null;",
+                    ws_ids[-1]
+                )
+            except Exception:
+                last_ready_state = None
+        return {
+            "url": current_url,
+            "ws_ids": ws_ids,
+            "last_ready_state": last_ready_state,
+            "on_groups": current_url.startswith(GROUPS_URL),
+        }
+
     def send_ws_message(self, contents: list):
         """Send WebSocket message to TagPro."""
         ws_logger.info(f"SEND: {contents}")
         try:
             ws_ids = self.driver.execute_script("return Object.keys(window.myWebSockets || {});")
             if not ws_ids:
-                print("no websocket")
+                dbg = self.get_ws_debug_info()
+                print(f"DEBUG: No websocket available. url={dbg['url']} on_groups={dbg['on_groups']} ws_ids={dbg['ws_ids']}")
                 return
         except Exception as e:
             print(f"WebSocket not ready yet: {e}")
@@ -168,6 +196,8 @@ class DriverAdapter:
         
         # Only send if on a group page
         if not self.driver.current_url.startswith(GROUPS_URL):
+            dbg = self.get_ws_debug_info()
+            print(f"DEBUG: Not on groups page for WS send. url={dbg['url']} contents={contents} ws_ids={dbg['ws_ids']} readyState={dbg['last_ready_state']}")
             return
         
         group_id = self.driver.current_url.strip('/').split('/')[-1]

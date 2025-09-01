@@ -335,6 +335,7 @@ class TagproBot:
         self.current_game_preset = self.current_preset
         # Don't set current_preset to None immediately - keep it for potential re-launches
         self.game_id_pending = True  # Set pending state before launching
+        print(f"DEBUG: maybe_launch: preset={self.current_game_preset} ready_balls={self.num_ready_balls} url={self.adapter.driver.current_url}")
         self.adapter.send_ws_message(["groupPlay"])
         event_logger.info(f"Launched preset: {self.current_game_preset}")
         event_logger.info("Game ID pending - bot will stay in game during joiner phase")
@@ -412,6 +413,10 @@ class TagproBot:
 
             self.adapter.process_ws_events()
 
+            if self.game_id_pending:
+                dbg = self.adapter.get_ws_debug_info()
+                print(f"DEBUG: joiner phase active. url={dbg['url']} on_groups={dbg['on_groups']} ws_ids={dbg['ws_ids']} readyState={dbg['last_ready_state']}")
+
             # Health check: ensure we are in a specific group page; if not, navigate and join/create
             self.ensure_group_session()
 
@@ -419,6 +424,8 @@ class TagproBot:
                 print("LAUNCHED NEW")
                 time.sleep(GAME_STR_DELAY)
                 try:
+                    dbg = self.adapter.get_ws_debug_info()
+                    print(f"DEBUG: sending game_str. url={dbg['url']} on_groups={dbg['on_groups']} ws_ids={dbg['ws_ids']} readyState={dbg['last_ready_state']}")
                     self.adapter.send_chat_msg(self.game_str)
                 except Exception as e:
                     print("FAILED TO SEND CHAT MSG", e)
