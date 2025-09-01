@@ -53,7 +53,8 @@ class TagproBot:
         if self.lobby_players is None:
             print(f"DEBUG: lobby_players is None")
             return 0
-        red_team_count = len(self.lobby_players["red-team"])
+        # Use .get to avoid KeyError if snapshot is malformed or incomplete
+        red_team_count = len(self.lobby_players.get("red-team", []))
         print(f"DEBUG: num_ready_balls calculation: lobby_players={self.lobby_players}, red_team_count={red_team_count}")
         return red_team_count
 
@@ -279,8 +280,14 @@ class TagproBot:
         We normalize snapshots to avoid false negatives due to ordering and
         only log when a real change occurs.
         """
-        # Obtain a fresh snapshot if one was not provided
-        lobby_players_current = lobby_snapshot or self.adapter.get_lobby_players()
+        # Obtain a fresh snapshot if one was not provided or looks invalid
+        expected_teams = {"red-team", "blue-team", "spectators", "waiting"}
+        snapshot_is_valid = isinstance(lobby_snapshot, dict) and any(
+            key in expected_teams for key in lobby_snapshot.keys()
+        )
+        lobby_players_current = (
+            lobby_snapshot if snapshot_is_valid else self.adapter.get_lobby_players()
+        )
 
         # Normalize snapshots for robust comparison (order-insensitive)
         def _normalize(snapshot):
