@@ -35,6 +35,7 @@ class TagproBot:
         self.game_is_active = False
         self.game_id_pending = False
         self.group_configured = False
+        self.joiner_started_at = None
 
         # Set up event handlers
         self.adapter.event_handlers["ws_chat"] = self.chat_handler.handle_chat
@@ -135,11 +136,30 @@ class TagproBot:
         - If on groups page, attempt join; if not found, create; then configure and move to spectators.
         """
         current_url = self.adapter.driver.current_url
+        
+        # Handle VPN routing page during joiner phase
+        if "/vpn" in current_url:
+            self._handle_vpn_page()
+            return
+            
         # Do not navigate or reconfigure during joiner/game start phase
         if self.game_id_pending:
+            print("DEBUG: ensure_group_session: joiner active, skipping navigation")
             return
+        
+        # Joiner navigation lock: after launching, avoid forcing navigation for a grace period
+        if self.joiner_started_at is not None:
+            elapsed = time.time() - self.joiner_started_at
+            if elapsed < 30:
+                print(f"DEBUG: ensure_group_session: joiner lock active ({elapsed:.1f}s), skipping navigation")
+                return
 
         if not current_url.startswith(GROUPS_URL):
+            # Avoid navigating away from the game page if we happen to be there
+            if current_url == GAME_URL:
+                print("DEBUG: ensure_group_session: on GAME_URL, not navigating to groups")
+                return
+            print(f"DEBUG: ensure_group_session: navigating to groups from {current_url}")
             self.adapter.driver.get(GROUPS_URL)
             self.group_configured = False
             return
@@ -188,6 +208,176 @@ class TagproBot:
         # Move to spectators when we know our id
         if self.adapter.my_id is not None:
             self.adapter.send_ws_message(["team", {"id": self.adapter.my_id, "team": 3}])
+
+    def _handle_vpn_page(self):
+        """Investigate and handle TagPro VPN routing page during joiner phase.
+        
+        This page appears in some environments between group launch and game start.
+        We'll analyze what's available and try different approaches to proceed.
+        """
+        current_url = self.adapter.driver.current_url
+        
+        # Initialize VPN handling state if not exists
+        if not hasattr(self, 'vpn_page_start_time'):
+            self.vpn_page_start_time = time.time()
+            event_logger.info(f"VPN_PAGE: First encounter at {current_url}")
+            
+        time_on_vpn = time.time() - self.vpn_page_start_time
+        event_logger.info(f"VPN_PAGE: Been on VPN page for {time_on_vpn:.1f}s")
+        
+        # Analyze page content and structure
+        self._analyze_vpn_page_content()
+        
+        # Try different strategies based on time spent
+        if time_on_vpn < 5:
+            # Strategy 1: Wait for auto-redirect
+            event_logger.info("VPN_PAGE: Strategy 1 - Waiting for auto-redirect")
+            return
+            
+        elif time_on_vpn < 10:
+            # Strategy 2: Look for and click continue/proceed buttons
+            event_logger.info("VPN_PAGE: Strategy 2 - Looking for interaction elements")
+            if self._try_vpn_page_interactions():
+                return
+                
+        elif time_on_vpn < 15:
+            # Strategy 3: Try refreshing the page
+            event_logger.info("VPN_PAGE: Strategy 3 - Refreshing page")
+            self.adapter.driver.refresh()
+            return
+            
+        elif time_on_vpn < 20:
+            # Strategy 4: Navigate to game URL directly
+            event_logger.info("VPN_PAGE: Strategy 4 - Direct navigation to game URL")
+            self.adapter.driver.get(GAME_URL)
+            return
+            
+        else:
+            # Strategy 5: Abort and return to groups
+            event_logger.info("VPN_PAGE: Strategy 5 - Timeout, returning to groups")
+            self.game_id_pending = False  # Reset pending state
+            self.adapter.driver.get(GROUPS_URL)
+            self.group_configured = False
+            delattr(self, 'vpn_page_start_time')
+            return
+
+    def _analyze_vpn_page_content(self):
+        """Analyze what's available on the VPN page for debugging."""
+        try:
+            # Get page title and basic info
+            title = self.adapter.driver.title
+            url = self.adapter.driver.current_url
+            event_logger.info(f"VPN_PAGE_ANALYSIS: Title='{title}' URL='{url}'")
+            
+            # Check for common elements
+            body_text = self.adapter.driver.execute_script("return document.body.innerText;")[:200]
+            event_logger.info(f"VPN_PAGE_ANALYSIS: Body text preview: '{body_text}'")
+            
+            # Look for buttons, links, forms
+            buttons = self.adapter.find_elements("button")
+            links = self.adapter.find_elements("a")
+            forms = self.adapter.find_elements("form")
+            inputs = self.adapter.find_elements("input")
+            
+            event_logger.info(f"VPN_PAGE_ANALYSIS: Found {len(buttons)} buttons, {len(links)} links, {len(forms)} forms, {len(inputs)} inputs")
+            
+            # Log button/link text
+            for i, btn in enumerate(buttons[:5]):  # First 5 buttons
+                try:
+                    btn_text = btn.text.strip()
+                    btn_visible = btn.is_displayed()
+                    event_logger.info(f"VPN_PAGE_ANALYSIS: Button {i}: '{btn_text}' visible={btn_visible}")
+                except Exception:
+                    event_logger.info(f"VPN_PAGE_ANALYSIS: Button {i}: <error reading>")
+                    
+            for i, link in enumerate(links[:5]):  # First 5 links
+                try:
+                    link_text = link.text.strip()
+                    link_href = link.get_attribute("href")
+                    link_visible = link.is_displayed()
+                    event_logger.info(f"VPN_PAGE_ANALYSIS: Link {i}: '{link_text}' href='{link_href}' visible={link_visible}")
+                except Exception:
+                    event_logger.info(f"VPN_PAGE_ANALYSIS: Link {i}: <error reading>")
+                    
+            # Check for meta redirects or JavaScript redirects
+            meta_refresh = self.adapter.driver.execute_script("""
+                var meta = document.querySelector('meta[http-equiv="refresh"]');
+                return meta ? meta.getAttribute('content') : null;
+            """)
+            if meta_refresh:
+                event_logger.info(f"VPN_PAGE_ANALYSIS: Meta refresh found: {meta_refresh}")
+                
+            # Check WebSocket injection status
+            ws_info = self.adapter.get_ws_debug_info()
+            event_logger.info(f"VPN_PAGE_ANALYSIS: WebSocket info: {ws_info}")
+            
+        except Exception as e:
+            event_logger.info(f"VPN_PAGE_ANALYSIS: Error during analysis: {e}")
+
+    def _try_vpn_page_interactions(self):
+        """Try to interact with VPN page elements to proceed.
+        
+        Returns True if an interaction was attempted, False otherwise.
+        """
+        try:
+            # Common button texts that might advance the flow
+            continue_texts = [
+                "continue", "proceed", "next", "ok", "submit", "connect", 
+                "enter", "join", "go", "start", "play", "launch"
+            ]
+            
+            # Try clicking buttons with relevant text
+            buttons = self.adapter.find_elements("button")
+            for btn in buttons:
+                try:
+                    if not btn.is_displayed():
+                        continue
+                        
+                    btn_text = btn.text.strip().lower()
+                    if any(keyword in btn_text for keyword in continue_texts):
+                        event_logger.info(f"VPN_PAGE_INTERACTION: Clicking button '{btn.text}'")
+                        btn.click()
+                        time.sleep(2)
+                        return True
+                except Exception as e:
+                    event_logger.info(f"VPN_PAGE_INTERACTION: Error clicking button: {e}")
+                    
+            # Try clicking links that might advance
+            links = self.adapter.find_elements("a")
+            for link in links:
+                try:
+                    if not link.is_displayed():
+                        continue
+                        
+                    link_text = link.text.strip().lower()
+                    link_href = link.get_attribute("href") or ""
+                    
+                    if (any(keyword in link_text for keyword in continue_texts) or 
+                        "game" in link_href or "play" in link_href):
+                        event_logger.info(f"VPN_PAGE_INTERACTION: Clicking link '{link.text}' href='{link_href}'")
+                        link.click()
+                        time.sleep(2)
+                        return True
+                except Exception as e:
+                    event_logger.info(f"VPN_PAGE_INTERACTION: Error clicking link: {e}")
+                    
+            # Try submitting forms if present
+            forms = self.adapter.find_elements("form")
+            if forms:
+                try:
+                    event_logger.info(f"VPN_PAGE_INTERACTION: Attempting to submit first form")
+                    forms[0].submit()
+                    time.sleep(2)
+                    return True
+                except Exception as e:
+                    event_logger.info(f"VPN_PAGE_INTERACTION: Error submitting form: {e}")
+                    
+            event_logger.info("VPN_PAGE_INTERACTION: No suitable interaction elements found")
+            return False
+            
+        except Exception as e:
+            event_logger.info(f"VPN_PAGE_INTERACTION: Error during interaction attempt: {e}")
+            return False
 
     def _handle_game_page(self):
         """Handle being on the game page."""
@@ -335,6 +525,7 @@ class TagproBot:
         self.current_game_preset = self.current_preset
         # Don't set current_preset to None immediately - keep it for potential re-launches
         self.game_id_pending = True  # Set pending state before launching
+        self.joiner_started_at = time.time()
         print(f"DEBUG: maybe_launch: preset={self.current_game_preset} ready_balls={self.num_ready_balls} url={self.adapter.driver.current_url}")
         self.adapter.send_ws_message(["groupPlay"])
         event_logger.info(f"Launched preset: {self.current_game_preset}")

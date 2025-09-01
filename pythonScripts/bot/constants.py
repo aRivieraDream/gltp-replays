@@ -6,7 +6,7 @@ GROUPS_URL = f"{BASE_URL}/groups/"
 GAME_URL = f"{BASE_URL}/game"
 
 # Room configuration
-ROOM_NAME = "GRAV LOBBY (TEMP)"
+ROOM_NAME = "Val's buggy af lobby - kill me"
 DISCORD_LINK = "discord.gg/Y3MZYdxV"
 
 # Group settings
