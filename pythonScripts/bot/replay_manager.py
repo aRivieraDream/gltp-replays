@@ -4,6 +4,7 @@ import json
 import os
 
 from maps import get_maps
+from constants import REPLAY_STATS_PATH
 
 
 def process_replays():
@@ -18,11 +19,11 @@ def process_replays():
 
 def update_replays():
     is_updated = process_downloaded_replays(
-        replay_stats_path="data/replay_stats.json",
+        replay_stats_path=REPLAY_STATS_PATH,
         replay_download_dir="data/replays"
     )
     if is_updated:
-        push_replay_stats_to_leaderboard(replay_stats_path="data/replay_stats.json")
+        push_replay_stats_to_leaderboard(replay_stats_path=REPLAY_STATS_PATH)
 
     # download bot replays (if not already downloaded)
     bot_logged_replays = [line.strip() for line in open("data/replay_uuids.txt").readlines() if line.strip()]
@@ -101,30 +102,60 @@ def push_replay_stats_to_leaderboard(replay_stats_path):
     print("Push to leaderboard status code:", response.status_code)
 
 
-def get_wr_entry(map_id, replay_stats_path="data/replay_stats.json"):
-    """load wr for map_id from replay_stats.json"""
-    for _ in range(10):
-        try:
-            data = json.load(open(replay_stats_path))
-        except json.decoder.JSONDecodeError:
-            time.sleep(0.1)
-            continue
-        break
+def get_wr_entry(map_id, replay_stats_path=REPLAY_STATS_PATH):
+    """load wr for map_id from external world records site"""
+    print(f"DEBUG: Looking for world record for map_id: {map_id}")
+    
+    try:
+        # Pull from external world records site
+        response = requests.get("https://worldrecords.bambitp.workers.dev/", timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        print(f"DEBUG: Successfully loaded external world records, found {len(data)} entries")
+        
+        # Find entries for this map_id
+        map_entries = [entry for entry in data if entry["map_id"] == map_id and entry["record_time"]]
+        if not map_entries:
+            print(f"DEBUG: No world record found for map_id: {map_id}")
+            return None
+            
+        # Return the fastest time
+        fastest_entry = min(map_entries, key=lambda e: e["record_time"])
+        print(f"DEBUG: Found world record: {fastest_entry['record_time']}ms by {fastest_entry['capping_player']}")
+        return fastest_entry
+        
+    except requests.RequestException as e:
+        print(f"DEBUG: Failed to fetch from external site: {e}")
+        # Fallback to local file if external site is unavailable
+        print(f"DEBUG: Falling back to local file: {replay_stats_path}")
+        
+        for _ in range(10):
+            try:
+                data = json.load(open(replay_stats_path))
+                print(f"DEBUG: Successfully loaded local replay stats, found {len(data)} entries")
+            except json.decoder.JSONDecodeError:
+                print(f"DEBUG: JSON decode error, retrying...")
+                time.sleep(0.1)
+                continue
+            except FileNotFoundError:
+                print(f"DEBUG: Local file not found: {replay_stats_path}")
+                return None
+            break
 
-    if isinstance(data, dict):
-        data_iter = data.values()
-    elif isinstance(data, list):
-        data_iter = data
-    else:
-        raise TypeError("Unexpected data format in replay_stats.json")
+        if isinstance(data, dict):
+            data_iter = data.values()
+        elif isinstance(data, list):
+            data_iter = data
+        else:
+            raise TypeError("Unexpected data format in replay_stats.json")
 
-    map_entries = [entry for entry in data_iter if entry["map_id"] == map_id and entry["record_time"]]
-    if not map_entries:
-        return None
-    return min(
-        map_entries,
-        key=lambda e: e["record_time"]
-    )
+        map_entries = [entry for entry in data_iter if entry["map_id"] == map_id and entry["record_time"]]
+        if not map_entries:
+            return None
+        return min(
+            map_entries,
+            key=lambda e: e["record_time"]
+        )
 
 
 def get_details(replay):

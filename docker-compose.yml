@@ -30,6 +30,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./pythonScripts/bot:/app/bot
+      - ./pythonScripts/bot/logs:/app/bot/logs
     restart: always
     environment:
       - PYTHONDONTWRITEBYTECODE=1

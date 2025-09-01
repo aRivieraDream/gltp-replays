@@ -2,6 +2,8 @@
 selenium==4.32.0
 rapidfuzz==3.13.0
 webdriver-manager==4.0.1
+httpx
+requests
 
 # for the bot
 discord.py==2.3.2

@@ -3,6 +3,12 @@
 Test script to verify all imports work correctly in the refactored structure.
 """
 
+import sys
+import os
+
+# Add the parent directory to the path so we can import bot modules
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 def test_imports():
     """Test that all modules can be imported successfully."""
     try:

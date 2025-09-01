@@ -141,7 +141,9 @@ class ChatHandler:
 
     def _handle_map_command(self):
         """Handle MAP command."""
+        print(f"DEBUG: MAP command received! current_game_preset: {self.bot.current_game_preset}")
         game_info = get_game_info(self.bot.current_game_preset)
+        print(f"DEBUG: game_info result: {game_info}")
         self.adapter.send_chat_msg(game_info)
 
     def _handle_info_command(self, msg):

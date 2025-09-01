@@ -1,5 +1,6 @@
 import time
 import random
+import requests
 from selenium.webdriver.common.by import By
 from driver_adapter import DriverAdapter
 from settings_manager import SettingsManager
@@ -10,7 +11,7 @@ from constants import (
     FINDING_GAME_TIMEOUT, GAME_END_TIMEOUT, PERIODIC_MESSAGE_INTERVAL,
     PRESET_LOAD_INTERVAL, LAUNCH_DELAY, GAME_STR_DELAY
 )
-from replay_manager import write_replay_uuid
+from replay_manager import write_replay_uuid, get_replay_data, get_details
 
 
 # Create event logger
@@ -33,6 +34,7 @@ class TagproBot:
         self.current_game_uuid = None
         self.game_is_active = False
         self.game_id_pending = False
+        self.group_configured = False
 
         # Set up event handlers
         self.adapter.event_handlers["ws_chat"] = self.chat_handler.handle_chat
@@ -49,8 +51,11 @@ class TagproBot:
     def num_ready_balls(self):
         """Get number of ready players."""
         if self.lobby_players is None:
+            print(f"DEBUG: lobby_players is None")
             return 0
-        return len(self.lobby_players["red-team"])
+        red_team_count = len(self.lobby_players["red-team"])
+        print(f"DEBUG: num_ready_balls calculation: lobby_players={self.lobby_players}, red_team_count={red_team_count}")
+        return red_team_count
 
     @property
     def num_in_lobby(self):
@@ -105,10 +110,13 @@ class TagproBot:
                 self._handle_game_page()
             
             self.adapter.driver.get(GROUPS_URL)
+            self.group_configured = False  # Reset flag when leaving group
 
         # Handle group configuration
         else:
-            self._configure_group()
+            if not self.group_configured:
+                self._configure_group()
+                self.group_configured = True
 
     def _handle_game_page(self):
         """Handle being on the game page."""
@@ -116,7 +124,7 @@ class TagproBot:
         if game_uuid:
             self.current_game_uuid = game_uuid
             event_logger.info(f"Game UUID: {self.current_game_uuid}")
-            write_replay_uuid(self.current_game_uuid)
+            # Don't write UUID to file yet - wait until game ends
         else:
             print("FAILED TO GET CLIENTINFO")
 
@@ -165,6 +173,11 @@ class TagproBot:
                 elif time.time() - self.game_end_timer_start > GAME_END_TIMEOUT:
                     # Game has been without gameId for timeout period, end it
                     event_logger.info(f"End of game: {self.current_game_preset}")
+                    
+                    # Process and upload replay if we have a UUID
+                    if hasattr(self, 'current_game_uuid') and self.current_game_uuid:
+                        self._process_and_upload_replay(self.current_game_uuid)
+                    
                     self.game_is_active = False
                     self.game_id_pending = False
                     self.adapter.send_chat_msg("GG. Loading next map. Please return to lobby.")
@@ -178,6 +191,8 @@ class TagproBot:
             if self.game_id_pending:
                 self.game_id_pending = False
                 event_logger.info(f"Game ID received: {event_details.get('gameId')}, joiner phase complete")
+                # Reset current_preset to None since game has actually started
+                self.current_preset = None
                 
             event_logger.info(f"Game Running: {self.current_game_preset}")
             
@@ -210,7 +225,7 @@ class TagproBot:
             return False
         
         self.current_game_preset = self.current_preset
-        self.current_preset = None
+        # Don't set current_preset to None immediately - keep it for potential re-launches
         self.game_id_pending = True  # Set pending state before launching
         self.adapter.send_ws_message(["groupPlay"])
         event_logger.info(f"Launched preset: {self.current_game_preset}")
@@ -230,6 +245,54 @@ class TagproBot:
         event_logger.info(f"Set preset: {preset}")
         # Give the preset time to apply
         time.sleep(2)
+
+    def _process_and_upload_replay(self, game_uuid):
+        """Process a replay and upload it to the world records site."""
+        try:
+            event_logger.info(f"Processing replay for UUID: {game_uuid}")
+            
+            # Get replay data from TagPro
+            replay_data = get_replay_data(game_uuid)
+            if not replay_data:
+                event_logger.info(f"Failed to get replay data for UUID: {game_uuid}")
+                return
+            
+            # Extract world record details using existing function
+            replay_details = get_details(replay_data)
+            if not replay_details or replay_details.get("record_time") is None:
+                event_logger.info(f"No valid world record data for UUID: {game_uuid}")
+                return
+            
+            # Filter to only include maps in spreadsheet (same logic as replay_manager)
+            from maps import get_maps
+            spreadsheet_map_ids = set([m["map_id"] for m in get_maps()])
+            
+            if replay_details["map_id"] not in spreadsheet_map_ids:
+                event_logger.info(f"Map {replay_details['map_id']} not in spreadsheet, skipping upload")
+                return
+            
+            # Upload single replay to world records site
+            response = requests.post(
+                "https://worldrecords.bambitp.workers.dev/upload",
+                params={"password": "insertPW"},
+                headers={"Content-Type": "application/json"},
+                json=[replay_details],
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                event_logger.info(f"Successfully uploaded replay to world records site: {game_uuid}")
+                event_logger.info(f"Record: {replay_details['record_time']}ms by {replay_details['capping_player']} on {replay_details['map_name']}")
+                
+                # Only save UUID to file after successful upload
+                write_replay_uuid(game_uuid)
+                event_logger.info(f"Saved UUID to replay_uuids.txt: {game_uuid}")
+            else:
+                event_logger.info(f"Failed to upload replay. Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            event_logger.info(f"Error processing replay {game_uuid}: {e}")
+            # Don't let replay processing errors crash the bot
 
     def run(self):
         """Main bot loop."""
@@ -257,11 +320,16 @@ class TagproBot:
             # Load random preset and maybe launch
             if i % PRESET_LOAD_INTERVAL == 0 and not self.adapter.is_game_active() and self.num_in_lobby != 1:
                 event_logger.info(f"Attempting to load preset and launch: i={i}, is_game_active={self.adapter.is_game_active()}, num_in_lobby={self.num_in_lobby}")
+                print(f"DEBUG: Attempting to load preset and launch: i={i}, is_game_active={self.adapter.is_game_active()}, num_in_lobby={self.num_in_lobby}")
                 self.load_random_preset()
                 # Give time for preset to load before trying to launch
                 time.sleep(LAUNCH_DELAY)
                 # Try to launch if conditions are met
                 launched_new = self.maybe_launch()
+                if launched_new:
+                    print(f"DEBUG: Successfully launched game with preset: {self.current_game_preset}")
+                else:
+                    print(f"DEBUG: Failed to launch game. Conditions: is_game_active={self.adapter.is_game_active()}, num_ready_balls={self.num_ready_balls}, current_preset={self.current_preset}")
 
             i += 1
             self.ensure_in_group(ROOM_NAME)

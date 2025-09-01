@@ -13,11 +13,11 @@ class SettingsManager:
 
     def load_saved_settings(self):
         """Load settings from file, fall back to defaults if file doesn't exist."""
-        return load_settings('bot_settings.json', DEFAULT_MAP_SETTINGS)
+        return load_settings('logs/bot_settings.json', DEFAULT_MAP_SETTINGS)
 
     def save_current_settings(self):
         """Save current settings to file."""
-        return save_settings(self.settings, 'bot_settings.json')
+        return save_settings(self.settings, 'logs/bot_settings.json')
 
     def reset_to_defaults(self):
         """Reset settings to default values."""

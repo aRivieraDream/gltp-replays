@@ -6,7 +6,7 @@ GROUPS_URL = f"{BASE_URL}/groups/"
 GAME_URL = f"{BASE_URL}/game"
 
 # Room configuration
-ROOM_NAME = "Tryhard Grav (No SomeBalls)"
+ROOM_NAME = "GRAV LOBBY (TEMP)"
 DISCORD_LINK = "discord.gg/Y3MZYdxV"
 
 # Default settings
@@ -125,3 +125,6 @@ PERIODIC_MESSAGE_INTERVAL = 1800  # 30 minutes
 PRESET_LOAD_INTERVAL = 10  # 10 seconds
 LAUNCH_DELAY = 5  # 5 seconds
 GAME_STR_DELAY = 10  # 10 seconds
+
+# File paths
+REPLAY_STATS_PATH = "data/replay_stats.json"

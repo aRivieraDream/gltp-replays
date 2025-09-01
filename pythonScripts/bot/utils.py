@@ -11,10 +11,23 @@ def setup_logger(name, filename):
     """Set up a logger with file handler and formatter."""
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
-    handler = logging.FileHandler(filename)
+    
+    # Create logs directory if it doesn't exist
+    import os
+    os.makedirs('logs', exist_ok=True)
+    
+    # Put log files in the logs directory
+    log_path = os.path.join('logs', filename)
+    handler = logging.FileHandler(log_path)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%d %H:%M:%S")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    
+    # Add console handler for real-time output
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+    
     return logger
 
 
@@ -64,8 +77,10 @@ def get_game_info(preset):
     if default_float(details['balls_req'], 100) > 1.0:
         msgs.append(f"YOU NEED {details['balls_req']} BALLS TO COMPLETE THIS MAP!")
 
+    print(f"DEBUG: Looking up world record for map_id: {details['map_id']}")
     wr = get_wr_entry(details['map_id'])
     if wr:
+        print(f"DEBUG: Found world record: {wr['record_time']}ms by {wr['capping_player']}")
         msgs.append(
             "WR: " + timedelta_str(dt.timedelta(seconds=wr['record_time'] / 1000)) +
             f" (Cap by {wr['capping_player']}) " +
@@ -76,6 +91,7 @@ def get_game_info(preset):
         if wr['capping_player_quote']:
             msgs.append(f"WR Quote: '{wr['capping_player_quote']}'")
     else:
+        print(f"DEBUG: No world record found for map_id: {details['map_id']}")
         msgs.append("(No world record less than 60 minutes recorded for this map)")
     
     return "\n".join(msgs)
@@ -106,6 +122,13 @@ def find_best_info_message(query, periodic_messages):
 def save_settings(settings, filename='bot_settings.json'):
     """Save settings to JSON file."""
     try:
+        # Create logs directory if it doesn't exist
+        os.makedirs('logs', exist_ok=True)
+        
+        # Put settings files in the logs directory
+        if not filename.startswith('logs/'):
+            filename = os.path.join('logs', filename)
+            
         with open(filename, 'w') as f:
             json.dump(settings, f, indent=2)
         return True
@@ -117,7 +140,17 @@ def save_settings(settings, filename='bot_settings.json'):
 def load_settings(filename='bot_settings.json', default_settings=None):
     """Load settings from JSON file with fallback to defaults."""
     try:
-        if os.path.exists(filename):
+        # Check in logs directory first
+        if not filename.startswith('logs/'):
+            logs_filename = os.path.join('logs', filename)
+        else:
+            logs_filename = filename
+            
+        if os.path.exists(logs_filename):
+            with open(logs_filename, 'r') as f:
+                saved_settings = json.load(f)
+            return saved_settings
+        elif os.path.exists(filename):  # Fallback to old location
             with open(filename, 'r') as f:
                 saved_settings = json.load(f)
             return saved_settings

@@ -20,6 +20,10 @@ This directory contains the refactored TagPro bot code, broken down into modular
 - `replay_manager.py` - Replay handling (existing file)
 - `requirements.txt` - Python dependencies (existing file)
 
+### Organization
+- `tests/` - Test files and test runner
+- `logs/` - Log files, settings, and replay data
+
 ## Key Improvements
 
 ### 1. Separation of Concerns
@@ -73,6 +77,16 @@ python main.py
 #### Option 3: Direct execution (if venv is already activated)
 ```bash
 python main.py
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+python tests/run_tests.py
+
+# Run specific test
+python tests/test_imports.py
 ```
 
 ### Configuration
