@@ -126,14 +126,17 @@ class DriverAdapter:
 
     def process_ws_events(self):
         """Process WebSocket messages and trigger event handlers."""
-        ws_messages = self.driver.execute_script("""
-            var messagesCopy = {};
-            for (var id in window.myWsMessages) {
-                messagesCopy[id] = window.myWsMessages[id].slice();
-                window.myWsMessages[id] = [];
-            }
-            return messagesCopy;
-        """)
+        try:
+            ws_messages = self.driver.execute_script("""
+                var messagesCopy = {};
+                for (var id in window.myWsMessages) {
+                    messagesCopy[id] = window.myWsMessages[id].slice();
+                    window.myWsMessages[id] = [];
+                }
+                return messagesCopy;
+            """)
+        except Exception as _:
+            return
         
         for msg_key, msgs in ws_messages.items():
             for msg in msgs:
@@ -142,7 +145,10 @@ class DriverAdapter:
                     event_type, event_details = msg[0], msg[1]
                     event_key = f"ws_{event_type}"
                     if event_key in self.event_handlers:
-                        self.event_handlers[event_key](event_details)
+                        try:
+                            self.event_handlers[event_key](event_details)
+                        except Exception as e:
+                            ws_logger.info(f"HANDLER_ERROR: {event_key} {e}")
                     elif event_key == "ws_you":
                         self.my_id = event_details
 

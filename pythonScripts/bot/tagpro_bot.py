@@ -135,7 +135,8 @@ class TagproBot:
         - If on groups page, attempt join; if not found, create; then configure and move to spectators.
         """
         current_url = self.adapter.driver.current_url
-        if self.game_id_pending and current_url == GAME_URL:
+        # Do not navigate or reconfigure during joiner/game start phase
+        if self.game_id_pending:
             return
 
         if not current_url.startswith(GROUPS_URL):
@@ -180,7 +181,8 @@ class TagproBot:
 
     def _post_join_or_create_setup(self):
         """After joining/creating: configure settings, ensure public if desired, move to spectators."""
-        if not self.group_configured:
+        # Avoid reconfiguring during joiner to prevent race with game start
+        if not self.group_configured and not self.game_id_pending and not self.adapter.is_game_active():
             self._configure_group()
             self.group_configured = True
         # Move to spectators when we know our id
