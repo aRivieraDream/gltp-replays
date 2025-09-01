@@ -118,7 +118,7 @@ CHROME_OPTIONS = [
 
 # Login mode configuration
 LOGIN_MODE = True  # Set to True for manual login, False for normal operation
-CHROME_PROFILE_DIR = "/app/chrome-profile"  # Persistent profile directory
+CHROME_PROFILE_DIR = "/app/chrome-profile/login"  # Persistent profile directory
 
 # Platform-specific browser paths
 CHROME_PATHS = {

@@ -45,8 +45,19 @@ class DriverAdapter:
         for option in chrome_options:
             options.add_argument(option)
         
-        # Add persistent profile directory
+        # Add persistent profile directory with unique session handling
+        import os
+        import time
+        
+        # Ensure profile directory exists
+        os.makedirs(CHROME_PROFILE_DIR, exist_ok=True)
+        
+        # Add profile and force single-process to avoid conflicts
         options.add_argument(f"--user-data-dir={CHROME_PROFILE_DIR}")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-plugins-discovery")
+        options.add_argument("--no-first-run")
+        
         print(f"Using Chrome profile directory: {CHROME_PROFILE_DIR}")
         
         # Disable alerts and popups
