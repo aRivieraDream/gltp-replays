@@ -172,11 +172,23 @@ class ChatHandler:
         self.adapter.send_chat_msg(response)
 
     def handle_member(self, event_details):
-        """Handle member join/leave events."""
+        """Handle member join/leave/team-change events.
+        - Update authed map for known names
+        - Enforce SomeBalls restriction if enabled
+        - Always refresh lobby snapshot so ready counts stay in sync
+        """
         if event_details.get("auth") and event_details.get("name"):
             self.authed_members[event_details["name"]] = event_details["id"]
         elif self.disallow_someballs:
             self.adapter.send_ws_message(["kick", event_details["id"]])
+
+        # Notify bot that lobby composition may have changed
+        try:
+            lobby_players = self.adapter.get_lobby_players()
+            # Delegate to bot's team-change logic to compute ready counts/log
+            self.bot.handle_team_change(lobby_players)
+        except Exception:
+            pass
 
     def get_authed_members(self):
         """Get authenticated members."""

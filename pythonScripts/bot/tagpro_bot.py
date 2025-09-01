@@ -7,7 +7,7 @@ from settings_manager import SettingsManager
 from chat_handler import ChatHandler
 from utils import setup_logger, get_game_info
 from constants import (
-    ROOM_NAME, GROUPS_URL, GAME_URL, PERIODIC_MESSAGES,
+    ROOM_NAME, GROUPS_URL, GAME_URL, GROUP_SETTINGS, PERIODIC_MESSAGES,
     FINDING_GAME_TIMEOUT, GAME_END_TIMEOUT, PERIODIC_MESSAGE_INTERVAL,
     PRESET_LOAD_INTERVAL, LAUNCH_DELAY, GAME_STR_DELAY
 )
@@ -67,6 +67,8 @@ class TagproBot:
     def ensure_in_group(self, room_name):
         """Ensure the browser is in the desired group."""
         current_url = self.adapter.driver.current_url
+        
+        print(f"DEBUG: ensure_in_group called. Current URL: {current_url}, room_name: {room_name}")
 
         # If game ID is pending, don't navigate away from game page
         if self.game_id_pending and current_url == GAME_URL:
@@ -114,9 +116,75 @@ class TagproBot:
 
         # Handle group configuration
         else:
+            print(f"DEBUG: In group configuration section. group_configured = {self.group_configured}")
+            
+            # Only configure once, since the server confirms settings are applied
             if not self.group_configured:
+                print("DEBUG: Calling _configure_group()")
                 self._configure_group()
                 self.group_configured = True
+                print("DEBUG: Set group_configured = True")
+            else:
+                print("DEBUG: Group already configured, skipping configuration")
+
+    def ensure_group_session(self):
+        """Health check to ensure we are in a group; join or create if needed.
+        - If at game and in joiner phase, stay.
+        - If not on groups page, navigate there.
+        - If on groups page, attempt join; if not found, create; then configure and move to spectators.
+        """
+        current_url = self.adapter.driver.current_url
+        if self.game_id_pending and current_url == GAME_URL:
+            return
+
+        if not current_url.startswith(GROUPS_URL):
+            self.adapter.driver.get(GROUPS_URL)
+            self.group_configured = False
+            return
+
+        # On groups page: try to join or create
+        if not self._try_join_group_by_name(ROOM_NAME):
+            self._create_group()
+
+    def _try_join_group_by_name(self, room_name):
+        """Return True if joined target group, False otherwise."""
+        group_items = self.adapter.find_elements("div.group-item")
+        for group in group_items:
+            try:
+                name_text = group.find_element(By.CSS_SELECTOR, ".group-name").text.strip()
+            except Exception:
+                continue
+            if name_text == room_name:
+                try:
+                    join_button = group.find_element(By.CSS_SELECTOR, "a.btn.btn-primary.pull-right")
+                    join_button.click()
+                    time.sleep(1)
+                    self._post_join_or_create_setup()
+                    return True
+                except Exception:
+                    return False
+        return False
+
+    def _create_group(self):
+        """Create a new group and run setup."""
+        create_btns = self.adapter.find_elements("#create-group-btn")
+        if create_btns:
+            try:
+                create_btns[0].click()
+                time.sleep(1)
+            except Exception:
+                return False
+        self._post_join_or_create_setup()
+        return True
+
+    def _post_join_or_create_setup(self):
+        """After joining/creating: configure settings, ensure public if desired, move to spectators."""
+        if not self.group_configured:
+            self._configure_group()
+            self.group_configured = True
+        # Move to spectators when we know our id
+        if self.adapter.my_id is not None:
+            self.adapter.send_ws_message(["team", {"id": self.adapter.my_id, "team": 3}])
 
     def _handle_game_page(self):
         """Handle being on the game page."""
@@ -132,14 +200,14 @@ class TagproBot:
         """Configure group settings."""
         lobby_settings = self.settings_manager.get_lobby_settings()
         
+        event_logger.info("Configuring group settings...")
+        print("DEBUG: Configuring group settings...")
+        
         # Set group name and basic settings
-        self.adapter.send_ws_message(["setting", {"name": "groupName", "value": ROOM_NAME}])
-        self.adapter.send_ws_message(["setting", {"name": "serverSelect", "value": "false"}])
-        self.adapter.send_ws_message(["setting", {"name": "regions", "value": lobby_settings["region"]}])
-        self.adapter.send_ws_message(["setting", {"name": "discoverable", "value": "true"}])
-        self.adapter.send_ws_message(["setting", {"name": "redTeamName", "value": "Good Team"}])
-        self.adapter.send_ws_message(["setting", {"name": "blueTeamName", "value": "Bad Team"}])
-        self.adapter.send_ws_message(["setting", {"name": "ghostMode", "value": "noPlayerOrMarsCollisions"}])
+        for setting_name, setting_value in GROUP_SETTINGS.items():
+            event_logger.info(f"Sending group setting: {setting_name} = {setting_value}")
+            print(f"DEBUG: Sending group setting: {setting_name} = {setting_value}")
+            self.adapter.send_ws_message(["setting", {"name": setting_name, "value": setting_value}])
         
         # Move bot to spectators
         if self.adapter.my_id is not None:
@@ -201,17 +269,43 @@ class TagproBot:
                 self.game_is_active = True
                 event_logger.info(f"Game activated with {self.num_ready_balls} ready players")
 
-    def handle_team_change(self, _):
-        """Handle team change events."""
-        lobby_players = self.adapter.get_lobby_players()
+    def handle_team_change(self, lobby_snapshot=None):
+        """Handle lobby/team changes and keep ready counts in sync.
 
-        if lobby_players == self.lobby_players:
+        This is invoked in two ways:
+        - From DOM polling (e.g., ws_removed handler) with no snapshot provided
+        - From ws_member events (chat handler) passing a fresh snapshot
+
+        We normalize snapshots to avoid false negatives due to ordering and
+        only log when a real change occurs.
+        """
+        # Obtain a fresh snapshot if one was not provided
+        lobby_players_current = lobby_snapshot or self.adapter.get_lobby_players()
+
+        # Normalize snapshots for robust comparison (order-insensitive)
+        def _normalize(snapshot):
+            normalized = {}
+            for team_name, players in (snapshot or {}).items():
+                normalized[team_name] = sorted(
+                    [(p.get("name", ""), p.get("location", "")) for p in players]
+                )
+            return normalized
+
+        current_norm = _normalize(lobby_players_current)
+        previous_norm = _normalize(self.lobby_players)
+
+        if current_norm == previous_norm:
+            # No material change; avoid noisy logs
             return
 
-        self.lobby_players = lobby_players
-        event_logger.info(f"(Red) Ready balls: {self.num_ready_balls}")
-        event_logger.info(f"Lobby Players: {lobby_players}")
-        event_logger.info(f"Game active: {self.game_is_active}, Ready players: {self.num_ready_balls}")
+        # Commit the new snapshot and log concise state
+        self.lobby_players = lobby_players_current
+        red_count = self.num_ready_balls
+        print(f"(Red) Ready balls: {red_count}")
+        print(f"Lobby Players: {self.lobby_players}")
+        print(
+            f"Game active: {self.game_is_active}, Ready players: {red_count}"
+        )
 
         # Only reset to default if no users AND we haven't set custom settings
         if self.num_in_lobby == 1:
@@ -304,6 +398,9 @@ class TagproBot:
 
             self.adapter.process_ws_events()
 
+            # Health check: ensure we are in a specific group page; if not, navigate and join/create
+            self.ensure_group_session()
+
             if launched_new:
                 print("LAUNCHED NEW")
                 time.sleep(GAME_STR_DELAY)
@@ -331,5 +428,6 @@ class TagproBot:
                 else:
                     print(f"DEBUG: Failed to launch game. Conditions: is_game_active={self.adapter.is_game_active()}, num_ready_balls={self.num_ready_balls}, current_preset={self.current_preset}")
 
+            # (Deprecated) Periodic ensure_in_group replaced by continuous health check
+            
             i += 1
-            self.ensure_in_group(ROOM_NAME)

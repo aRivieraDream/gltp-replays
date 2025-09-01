@@ -9,6 +9,17 @@ GAME_URL = f"{BASE_URL}/game"
 ROOM_NAME = "GRAV LOBBY (TEMP)"
 DISCORD_LINK = "discord.gg/Y3MZYdxV"
 
+# Group settings
+GROUP_SETTINGS = {
+    "groupName": ROOM_NAME,
+    "serverSelect": "false",
+    "regions": "US Central",
+    "discoverable": "true",
+    "redTeamName": "Good",
+    "blueTeamName": "Bad",
+    "ghostMode": "noPlayerOrMarsCollisions"
+}
+
 # Default settings
 DEFAULT_MAP_SETTINGS = {
     "category": None,
@@ -17,7 +28,8 @@ DEFAULT_MAP_SETTINGS = {
 }
 
 DEFAULT_LOBBY_SETTINGS = {
-    "region": "US Central"
+    "region": "US Central",
+    "discoverable": "true"
 }
 
 # User management
@@ -119,12 +131,12 @@ CHROME_PATHS = {
 }
 
 # Game timing constants
-FINDING_GAME_TIMEOUT = 300  # 5 minutes
-GAME_END_TIMEOUT = 10  # 10 seconds
-PERIODIC_MESSAGE_INTERVAL = 1800  # 30 minutes
-PRESET_LOAD_INTERVAL = 10  # 10 seconds
-LAUNCH_DELAY = 5  # 5 seconds
-GAME_STR_DELAY = 10  # 10 seconds
+FINDING_GAME_TIMEOUT = 300  
+GAME_END_TIMEOUT = 2  
+PERIODIC_MESSAGE_INTERVAL = 1800  
+PRESET_LOAD_INTERVAL = 5  #
+LAUNCH_DELAY = 5  
+GAME_STR_DELAY = 5  
 
 # File paths
 REPLAY_STATS_PATH = "data/replay_stats.json"

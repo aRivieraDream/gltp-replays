@@ -149,9 +149,13 @@ class DriverAdapter:
     def send_ws_message(self, contents: list):
         """Send WebSocket message to TagPro."""
         ws_logger.info(f"SEND: {contents}")
-        ws_ids = self.driver.execute_script("return Object.keys(window.myWebSockets);")
-        if not ws_ids:
-            print("no websocket")
+        try:
+            ws_ids = self.driver.execute_script("return Object.keys(window.myWebSockets || {});")
+            if not ws_ids:
+                print("no websocket")
+                return
+        except Exception as e:
+            print(f"WebSocket not ready yet: {e}")
             return
         
         ws_id = ws_ids[-1]
