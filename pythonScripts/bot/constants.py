@@ -116,6 +116,10 @@ CHROME_OPTIONS = [
     "--remote-debugging-port=9222"
 ]
 
+# Login mode configuration
+LOGIN_MODE = True  # Set to True for manual login, False for normal operation
+CHROME_PROFILE_DIR = "/app/chrome-profile"  # Persistent profile directory
+
 # Platform-specific browser paths
 CHROME_PATHS = {
     "Darwin": [  # macOS
@@ -124,9 +128,9 @@ CHROME_PATHS = {
         "/usr/bin/chromium"
     ],
     "Linux": [  # Linux
-        "/usr/bin/chromium",
-        "/usr/bin/chromium-browser", 
-        "/usr/bin/google-chrome"
+        "/usr/bin/google-chrome",           # System Chrome (preferred)
+        "/usr/bin/chromium-browser",        # System Chromium
+        "/snap/bin/chromium"               # Snap Chromium (fallback)
     ]
 }
 

@@ -137,9 +137,9 @@ class TagproBot:
         """
         current_url = self.adapter.driver.current_url
         
-        # Handle VPN routing page during joiner phase
-        if "/vpn" in current_url:
-            self._handle_vpn_page()
+        # Handle VPN routing page or login page
+        if "/vpn" in current_url or "/login" in current_url:
+            self._handle_login_required_page()
             return
             
         # Do not navigate or reconfigure during joiner/game start phase
@@ -209,57 +209,115 @@ class TagproBot:
         if self.adapter.my_id is not None:
             self.adapter.send_ws_message(["team", {"id": self.adapter.my_id, "team": 3}])
 
-    def _handle_vpn_page(self):
-        """Investigate and handle TagPro VPN routing page during joiner phase.
+    def _handle_login_required_page(self):
+        """Handle login required page (VPN block or explicit login page).
         
-        This page appears in some environments between group launch and game start.
-        We'll analyze what's available and try different approaches to proceed.
+        If LOGIN_MODE is enabled, assist with manual login.
+        Otherwise, log the issue and wait/retry.
         """
+        from constants import LOGIN_MODE
         current_url = self.adapter.driver.current_url
         
-        # Initialize VPN handling state if not exists
-        if not hasattr(self, 'vpn_page_start_time'):
-            self.vpn_page_start_time = time.time()
-            event_logger.info(f"VPN_PAGE: First encounter at {current_url}")
+        # Initialize handling state if not exists
+        if not hasattr(self, 'login_page_start_time'):
+            self.login_page_start_time = time.time()
+            event_logger.info(f"LOGIN_REQUIRED: First encounter at {current_url}")
             
-        time_on_vpn = time.time() - self.vpn_page_start_time
-        event_logger.info(f"VPN_PAGE: Been on VPN page for {time_on_vpn:.1f}s")
+        time_on_page = time.time() - self.login_page_start_time
+        event_logger.info(f"LOGIN_REQUIRED: Been on login page for {time_on_page:.1f}s")
         
-        # Analyze page content and structure
-        self._analyze_vpn_page_content()
+        # Analyze page content
+        analysis = self._analyze_login_page_content()
         
-        # Try different strategies based on time spent
-        if time_on_vpn < 5:
-            # Strategy 1: Wait for auto-redirect
-            event_logger.info("VPN_PAGE: Strategy 1 - Waiting for auto-redirect")
-            return
-            
-        elif time_on_vpn < 10:
-            # Strategy 2: Look for and click continue/proceed buttons
-            event_logger.info("VPN_PAGE: Strategy 2 - Looking for interaction elements")
-            if self._try_vpn_page_interactions():
+        if LOGIN_MODE:
+            # Manual login mode - assist the user
+            event_logger.info("LOGIN_MODE: Manual login mode enabled")
+            if "/login" not in current_url:
+                # Navigate to login page
+                event_logger.info("LOGIN_MODE: Navigating to login page")
+                self.adapter.driver.get("https://tagpro.koalabeast.com/login")
                 return
-                
-        elif time_on_vpn < 15:
-            # Strategy 3: Try refreshing the page
-            event_logger.info("VPN_PAGE: Strategy 3 - Refreshing page")
-            self.adapter.driver.refresh()
-            return
-            
-        elif time_on_vpn < 20:
-            # Strategy 4: Navigate to game URL directly
-            event_logger.info("VPN_PAGE: Strategy 4 - Direct navigation to game URL")
-            self.adapter.driver.get(GAME_URL)
-            return
-            
+            else:
+                # We're on login page - try to click Google login if available
+                if time_on_page < 5:
+                    self._try_google_login_click()
+                    return
+                else:
+                    event_logger.info("LOGIN_MODE: Waiting for manual login completion...")
+                    return
         else:
-            # Strategy 5: Abort and return to groups
-            event_logger.info("VPN_PAGE: Strategy 5 - Timeout, returning to groups")
-            self.game_id_pending = False  # Reset pending state
-            self.adapter.driver.get(GROUPS_URL)
-            self.group_configured = False
-            delattr(self, 'vpn_page_start_time')
-            return
+            # Normal mode - login required but not in login mode
+            if analysis.get("login_required"):
+                event_logger.info("LOGIN_REQUIRED: Authentication needed but LOGIN_MODE is disabled")
+                event_logger.info("LOGIN_REQUIRED: Set LOGIN_MODE=True in constants.py and restart for manual login")
+                # Clear joiner state and wait
+                if self.game_id_pending:
+                    self.game_id_pending = False
+                    self.joiner_started_at = None
+                # Wait and retry navigation to groups periodically
+                if time_on_page > 60:
+                    event_logger.info("LOGIN_REQUIRED: Timeout, attempting navigation to groups")
+                    self.adapter.driver.get(GROUPS_URL)
+                    delattr(self, 'login_page_start_time')
+                return
+
+    def _analyze_login_page_content(self):
+        """Analyze login/VPN page content."""
+        try:
+            title = self.adapter.driver.title
+            url = self.adapter.driver.current_url
+            body_text = self.adapter.driver.execute_script("return document.body ? document.body.innerText : '';") or ""
+            
+            event_logger.info(f"LOGIN_ANALYSIS: Title='{title}' URL='{url}'")
+            event_logger.info(f"LOGIN_ANALYSIS: Body preview: '{body_text[:200]}'")
+            
+            # Detection logic
+            login_required = any([
+                "vpn or proxy blocked" in body_text.lower(),
+                "log in" in body_text.lower(),
+                "sign up" in body_text.lower(),
+                "login" in title.lower(),
+                "/login" in url
+            ])
+            
+            return {"login_required": login_required}
+            
+        except Exception as e:
+            event_logger.info(f"LOGIN_ANALYSIS: Error: {e}")
+            return {"login_required": True}  # Assume login needed on error
+
+    def _try_google_login_click(self):
+        """Try to click Google login button to assist manual login."""
+        try:
+            # Look for Google login elements
+            google_selectors = [
+                "a[href*='google']",
+                "button[data-provider='google']",
+                "div[data-provider='google']",
+                ".google-login",
+                "[class*='google']"
+            ]
+            
+            for selector in google_selectors:
+                elements = self.adapter.find_elements(selector)
+                for element in elements:
+                    try:
+                        if element.is_displayed():
+                            element_text = element.text.lower()
+                            if "google" in element_text or "sign in" in element_text:
+                                event_logger.info(f"LOGIN_MODE: Clicking Google login element: {element.text}")
+                                element.click()
+                                time.sleep(2)
+                                return True
+                    except Exception:
+                        continue
+            
+            event_logger.info("LOGIN_MODE: No Google login button found, manual intervention needed")
+            return False
+            
+        except Exception as e:
+            event_logger.info(f"LOGIN_MODE: Error clicking Google login: {e}")
+            return False
 
     def _analyze_vpn_page_content(self):
         """Analyze what's available on the VPN page for debugging."""

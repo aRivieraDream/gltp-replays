@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import JavascriptException
 
-from constants import CHROME_OPTIONS, CHROME_PATHS, GROUPS_URL, GAME_URL
+from constants import CHROME_OPTIONS, CHROME_PATHS, GROUPS_URL, GAME_URL, LOGIN_MODE, CHROME_PROFILE_DIR
 from utils import setup_logger
 
 
@@ -30,9 +30,24 @@ class DriverAdapter:
         """Set up Chrome WebDriver with appropriate options."""
         options = webdriver.ChromeOptions()
         
-        # Add all chrome options
-        for option in CHROME_OPTIONS:
+        # Configure for login mode or normal operation
+        if LOGIN_MODE:
+            print("=== LOGIN MODE ENABLED ===")
+            print("Browser will open in visible mode for manual Google login.")
+            print("After logging in successfully, set LOGIN_MODE=False and restart.")
+            print("=========================")
+            # Remove headless for manual login
+            chrome_options = [opt for opt in CHROME_OPTIONS if opt != "--headless"]
+        else:
+            chrome_options = CHROME_OPTIONS
+        
+        # Add chrome options
+        for option in chrome_options:
             options.add_argument(option)
+        
+        # Add persistent profile directory
+        options.add_argument(f"--user-data-dir={CHROME_PROFILE_DIR}")
+        print(f"Using Chrome profile directory: {CHROME_PROFILE_DIR}")
         
         # Disable alerts and popups
         options.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 2})
